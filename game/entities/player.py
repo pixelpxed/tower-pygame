@@ -7,7 +7,10 @@ class Player:
     max_health: int = 100
     health: int = 100
     attack: int = 12
+    tower: int = 0
     floor: int = 1
+    location_tower: int = 0
+    location_floor: int = 1
     gold: int = 0
     inventory: list[str] = field(default_factory=list)
 
@@ -26,6 +29,9 @@ class Player:
 
     def reset(self) -> None:
         self.health = self.max_health
+        self.tower = 0
         self.floor = 1
+        self.location_tower = 0
+        self.location_floor = 1
         self.gold = 0
         self.inventory.clear()

@@ -6,10 +6,15 @@ from game.entities.monster import BattleMonster
 
 class Tower:
     def __init__(self, data_path: Path):
-        self.floors = json.loads(data_path.read_text(encoding="utf-8"))
+        data = json.loads(data_path.read_text(encoding="utf-8"))
+        self.towers = data["towers"] if isinstance(data, dict) else data
 
-    def monster_for_floor(self, floor: int) -> BattleMonster:
-        entry = self.floors[str(min(floor, len(self.floors)))]
+    def floors_for_tower(self, tower: int) -> list[dict]:
+        return self.towers[tower]["floors"]
+
+    def monster_for_floor(self, tower: int, floor: int) -> BattleMonster:
+        floors = self.floors_for_tower(tower)
+        entry = floors[min(floor - 1, len(floors) - 1)]
         monster = entry["monster"]
         return BattleMonster(
             monster["name"],
@@ -20,5 +25,8 @@ class Tower:
             monster.get("image", ""),
         )
 
-    def is_complete(self, floor: int) -> bool:
-        return floor > len(self.floors)
+    def is_complete(self, tower: int, floor: int) -> bool:
+        return tower >= len(self.towers)
+
+    def tower_name(self, tower: int) -> str:
+        return self.towers[tower]["name"]

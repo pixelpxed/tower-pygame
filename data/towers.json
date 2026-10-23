@@ -1,6 +1,28 @@
 {
-  "1": {"monster": {"name": "Slime", "health": 35, "attack": 6, "gold": 10, "image": "slime.png"}},
-  "2": {"monster": {"name": "Goblin", "health": 55, "attack": 9, "gold": 20, "image": "goblin.png"}},
-  "3": {"monster": {"name": "Skeleton", "health": 80, "attack": 13, "gold": 35, "image": "skeleton.png"}},
-  "4": {"monster": {"name": "Tower Boss", "health": 120, "attack": 18, "gold": 100, "image": "boss.png"}}
+  "towers": [
+    {
+      "name": "Sunspire",
+      "floors": [
+        {"monster": {"name": "Slime", "health": 35, "attack": 6, "gold": 10}},
+        {"monster": {"name": "Goblin", "health": 55, "attack": 9, "gold": 20}},
+        {"monster": {"name": "Skeleton", "health": 80, "attack": 13, "gold": 35}}
+      ]
+    },
+    {
+      "name": "Moonkeep",
+      "floors": [
+        {"monster": {"name": "Bat", "health": 45, "attack": 8, "gold": 18}},
+        {"monster": {"name": "Witch", "health": 70, "attack": 12, "gold": 30}},
+        {"monster": {"name": "Moon Knight", "health": 105, "attack": 17, "gold": 60}}
+      ]
+    },
+    {
+      "name": "Stormhold",
+      "floors": [
+        {"monster": {"name": "Orc", "health": 75, "attack": 14, "gold": 35}},
+        {"monster": {"name": "Golem", "health": 110, "attack": 18, "gold": 55}},
+        {"monster": {"name": "Tower Boss", "health": 150, "attack": 22, "gold": 100}}
+      ]
+    }
+  ]
 }

@@ -6,7 +6,6 @@ from game.settings import DATA_DIR, FPS, HEIGHT, TITLE, WIDTH
 from game.systems.combat import Combat
 from game.systems.progression import Progression
 from game.systems.tower import Tower
-from game.scenes.battle import BattleScene
 from game.scenes.game_over import GameOverScene
 from game.scenes.menu import MenuScene
 from game.scenes.tower import TowerScene
@@ -23,6 +22,7 @@ class Game:
         self.monster = None
         self.message = ""
         self.won = False
+        self.defeated = set()
         self.tower = Tower(DATA_DIR / "towers.json")
         self.potion = Item("Potion", "Restores health", 25)
         self.scene = MenuScene(self)
@@ -31,35 +31,50 @@ class Game:
         self.player.reset()
         self.won = False
         self.message = ""
+        self.defeated.clear()
         self.scene = TowerScene(self)
 
     def show_menu(self):
         self.scene = MenuScene(self)
 
-    def start_battle(self):
-        if self.tower.is_complete(self.player.floor):
+    def select_enemy(self, tower_index, floor_index):
+        enemy_id = (tower_index, floor_index)
+        if tower_index != self.player.tower or enemy_id in self.defeated:
+            return
+
+        self.player.location_tower = tower_index
+        self.player.location_floor = floor_index + 1
+        self.player.floor = floor_index + 1
+        self.monster = self.tower.monster_for_floor(tower_index, floor_index + 1)
+        dealt, taken = Combat.resolve_instantly(self.player, self.monster)
+        if self.monster.alive:
+            self.message = f"{self.monster.name} defeated you after {dealt} damage."
+            self.won = False
+            self.scene = GameOverScene(self)
+            return
+
+        self.defeated.add(enemy_id)
+        Progression.reward_for_victory(self.player, self.monster)
+        recovered = self.player.health
+        self.player.heal(self.player.max_health)
+        recovered = self.player.health - recovered
+        self.message = (
+            f"{self.monster.name} defeated! You dealt {dealt} damage and took {taken} damage."
+            f" Recovered {recovered} health."
+        )
+        tower_floor_count = len(self.tower.floors_for_tower(self.player.tower))
+        defeated_tower_floors = sum(
+            (self.player.tower, floor_index) in self.defeated
+            for floor_index in range(tower_floor_count)
+        )
+        if defeated_tower_floors == tower_floor_count:
+            self.player.tower += 1
+            self.player.floor = 1
+        if self.player.tower >= len(self.tower.towers):
             self.won = True
             self.message = "Every floor has been conquered."
             self.scene = GameOverScene(self)
             return
-        self.monster = self.tower.monster_for_floor(self.player.floor)
-        self.message = "Choose your action."
-        self.scene = BattleScene(self)
-
-    def player_attack(self):
-        if not self.monster or not self.monster.alive:
-            return
-        damage = Combat.player_attack(self.player, self.monster)
-        if not self.monster.alive:
-            Progression.reward_for_victory(self.player, self.monster)
-            self.message = Progression.reward_text(self.monster)
-            self.scene = TowerScene(self)
-            return
-        taken = Combat.monster_attack(self.player, self.monster)
-        self.message = f"You dealt {damage} damage and took {taken} damage."
-        if not self.player.alive:
-            self.won = False
-            self.scene = GameOverScene(self)
 
     def use_potion(self):
         if self.potion.use(self.player):
