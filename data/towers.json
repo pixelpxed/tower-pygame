@@ -1,0 +1,6 @@
+{
+  "1": {"monster": {"name": "Slime", "health": 35, "attack": 6, "gold": 10, "image": "slime.png"}},
+  "2": {"monster": {"name": "Goblin", "health": 55, "attack": 9, "gold": 20, "image": "goblin.png"}},
+  "3": {"monster": {"name": "Skeleton", "health": 80, "attack": 13, "gold": 35, "image": "skeleton.png"}},
+  "4": {"monster": {"name": "Tower Boss", "health": 120, "attack": 18, "gold": 100, "image": "boss.png"}}
+}
