@@ -1,72 +1,101 @@
-player_power = 5
-player_lives = 3
-player_position = (0, 0)
-
-level = [
-    [
-        {"type": "enemy", "power": 3},
-    ],
-    [
-        {"type": "enemy", "power": 3},
-        {"type": "enemy", "power": 3},
-    ],
-    [
-        {"type": "enemy", "power": 3},
-        {"type": "enemy", "power": 10},
-        {"type": "boss", "power": 16},
-    ],
-]
+try:
+    from .classes import Enemy, Floor, Level, Player, Tower
+except ImportError:
+    from classes import Enemy, Floor, Level, Player, Tower
 
 
-def display_level():
+def create_level():
+    return Level(
+        "First Level",
+        1,
+        [
+            Tower([Floor([Enemy("enemy", 3, None)])]),
+            Tower(
+                [Floor([Enemy("enemy", 3, "stick")]), Floor([Enemy("enemy", 3, None)])]
+            ),
+            Tower(
+                [
+                    Floor([Enemy("enemy", 3, "lightsaber")]),
+                    Floor([Enemy("enemy", 10, None)]),
+                    Floor([Enemy("boss", 16, None)]),
+                ]
+            ),
+        ],
+        "default",
+    )
+
+
+def display_level(level):
     print("\nCurrent Enemies:\n")
-    for i in range(len(level)):
-        print(f"Tower {i + 1}:")
-
-        if len(level[i]) == 0:
+    for tower_index, tower in enumerate(level.towers, 1):
+        print(f"Tower {tower_index}:")
+        if tower.is_completed():
             print(" - This tower has been defeated.")
         else:
-            for j in range(len(level[i])):
-                print(f" - Floor {j + 1}: {level[i][j]}")
+            for floor_index, floor in enumerate(tower.floors, 1):
+                if floor.is_completed():
+                    print(f" - Floor {floor_index} defeated")
+                else:
+                    for enemy in floor.entities:
+                        print(f" - Floor {floor_index}: {enemy}")
     print()
 
 
-while True:
-    if player_lives <= 0:
-        print("\nGame Over!\n")
-        break
+def main():
+    player = Player((0, 0), 5, 3, None)
+    level = create_level()
 
-    if len(level) == 0:
-        print("\nLevel Cleared!\n")
-        break
+    while player.get_lives() > 0 and not level.is_completed():
+        display_level(level)
+        print(
+            f"Your Power: {player.get_power()}, Lives: {player.get_lives()}, Item: {player.get_item()}\nDoable Damage: {player.get_doable_damage()}"
+        )
+        print("\n========================================\n")
 
-    display_level()
-    print(f"Your Power: {player_power}, Lives: {player_lives}")
+        try:
+            selection = (
+                input("Input your attack position (tower floor, e.g. 1 1): ")
+                .strip()
+                .split()
+            )
+            if len(selection) != 2:
+                raise ValueError
+            tower_index, floor_index = (int(value) - 1 for value in selection)
+            if tower_index < 0 or floor_index < 0:
+                raise IndexError
+            floor = level.towers[tower_index].floors[floor_index]
+            if floor.is_completed():
+                print("That floor has already been defeated.")
+                continue
+        except (ValueError, IndexError):
+            print("Enter a valid tower and floor number, such as 1 1.")
+            continue
+        except (EOFError, KeyboardInterrupt):
+            print("\nGame ended.")
+            return
 
-    print("\n========================================\n")
+        player.set_position((tower_index, floor_index))
+        enemy = floor.entities[0]
+        print()
 
-    attack_tower, attack_floor = input(
-        "Input your attack postion (tower_index, floor_index ex. 1 1): "
-    ).strip().split()
+        if player.get_doable_damage() > enemy.get_power():
+            player.add_power(enemy.get_power())
+            player.set_item(enemy.get_item())
+            floor.remove_entity(0)
+            print(f"Player won the battle at {(tower_index + 1, floor_index + 1)}")
+        else:
+            if enemy.get_kind() == "boss":
+                print("You fought a boss and lost, you died instantly!")
+                player.set_lives(0)
+            else:
+                player.remove_life()
+            print(f"Player lost a battle at {(tower_index + 1, floor_index + 1)}")
+            player.set_position((0, 0))
 
-    # Normalize the variable to start at Python index. (0)
-    attack_tower, attack_floor = [int(attack_tower) - 1, int(attack_floor) - 1]
+        print("\n========================================\n")
 
-    # Fighting Calculation
-    print()  # Seperator Line
-    if player_power > level[attack_tower][attack_floor]["power"]:
-        dead_enemy = level[attack_tower].pop(attack_floor)
-        player_power += dead_enemy["power"]
-        print(f"Player won the battle at {(attack_tower, attack_floor)}")
+    print("Game Over!\n" if player.get_lives() <= 0 else "\nLevel Cleared!\n")
 
-        if len(level[attack_tower]) == 0:
-            level.pop(attack_tower)
-    else:
-        if level[attack_tower][attack_floor]["type"] == "boss":
-            print(f"You fought a boss and lost, you died instantly!")
-            player_lives = 0
-        print(f"Player lost a battle at {(attack_tower, attack_floor)}")
-        player_lives -= 1
-        player_position = (0, 0)
 
-    print("\n========================================\n")
+if __name__ == "__main__":
+    main()
