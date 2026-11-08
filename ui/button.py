@@ -17,5 +17,5 @@ class Button:
     def draw(self, screen):
         hovered = self.rect.collidepoint(pygame.mouse.get_pos())
         color = (255, 198, 76) if hovered else COLORS["accent"]
-        pygame.draw.rect(screen, color, self.rect, border_radius=8)
-        draw_text(screen, self.label, self.rect.center, 22, COLORS["background"], center=True)
+        pygame.draw.rect(screen, color, self.rect, border_radius=45)
+        draw_text(screen, self.label, self.rect.center, 56, COLORS["background"], center=True)
