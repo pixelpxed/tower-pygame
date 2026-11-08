@@ -6,13 +6,14 @@ class Player:
     name: str = "Hero"
     max_health: int = 100
     health: int = 100
-    attack: int = 12
+    attack: int = 100 #ชั้นตั้งไว้ตอนเทสเฉยๆ ฝากเปลี่ยนกลับด้วยอิอิ
     tower: int = 0
     floor: int = 1
     location_tower: int = 0
     location_floor: int = 1
     gold: int = 0
     inventory: list[str] = field(default_factory=list)
+
 
     @property
     def alive(self) -> bool:
@@ -35,3 +36,5 @@ class Player:
         self.location_floor = 1
         self.gold = 0
         self.inventory.clear()
+        self.max_lives = 3
+        self.lives = 3
