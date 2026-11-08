@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-WIDTH = 960
-HEIGHT = 640
+WIDTH = 1280
+HEIGHT = 720
 FPS = 60
 TITLE = "Tower Game"
 ROOT_DIR = Path(__file__).resolve().parent.parent
