@@ -1,14 +1,21 @@
 import pygame
 
-from game.settings import COLORS, WIDTH
-from ui.button import Button
+from game.scenes.battle import load_background
+from game.settings import COLORS, HEIGHT, WIDTH
+from ui.battle_kub import HomeButton, draw_hearts, draw_power
 from ui.text import draw_text
+
+TOWER_WIDTH = 190
+GAP = 25
+BOTTOM = 440
+FLOOR_HEIGHT = 48
 
 
 class TowerScene:
     def __init__(self, game):
         self.game = game
-        self.menu = Button((WIDTH // 2 - 120, 535, 240, 44), "Main Menu", game.show_menu)
+        self.bg_image = load_background((WIDTH, HEIGHT))
+        self.menu = HomeButton((WIDTH // 2, 24 + 32), game.show_menu)  # top-center
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
@@ -18,71 +25,87 @@ class TowerScene:
                     break
         self.menu.handle_event(event)
 
+    # ------------------------------------------------------------ layout
+    def _left(self):
+        count = len(self.game.tower.towers)
+        return (WIDTH - (count * TOWER_WIDTH + (count - 1) * GAP)) // 2
+
+    def _floor_rects(self):
+        rects = []
+        for tower_index, tower in enumerate(self.game.tower.towers):
+            x = self._left() + tower_index * (TOWER_WIDTH + GAP)
+            for floor_index in range(len(tower["floors"])):
+                y = BOTTOM - (floor_index + 1) * FLOOR_HEIGHT
+                rects.append((tower_index, floor_index,
+                              pygame.Rect(x, y, TOWER_WIDTH, FLOOR_HEIGHT)))
+        return rects
+
+    # ------------------------------------------------------------- draw
     def draw(self, screen):
-        screen.fill(COLORS["background"])
+        screen.blit(self.bg_image, (0, 0))
         player = self.game.player
-        draw_text(screen, "TOWER MAP", (WIDTH // 2, 45), 34, COLORS["accent"], center=True)
-        draw_text(screen, f"{player.name}  |  HP {player.health}/{player.max_health}  |  Gold {player.gold}",
-                  (WIDTH // 2, 85), 20, COLORS["text"], center=True)
-        draw_text(screen, "Click an enemy to move there and resolve the fight instantly.",
-                  (WIDTH // 2, 120), 18,
-                  COLORS["muted"], center=True)
+
+        self._draw_hud(screen, player)
         if self.game.message:
-            draw_text(screen, self.game.message, (WIDTH // 2, 155), 16, COLORS["text"], center=True)
+            draw_text(screen, self.game.message, (WIDTH // 2, 230), 16, COLORS["text"], center=True)
+
         self._draw_towers(screen)
         self.menu.draw(screen)
 
-    def _floor_rects(self):
-        player = self.game.player
-        towers = self.game.tower.towers
-        tower_width = 190
-        gap = 25
-        left = (WIDTH - (len(towers) * tower_width + (len(towers) - 1) * gap)) // 2
-        bottom = 440
-        floor_height = 48
+    @staticmethod
+    def _draw_hud(screen, player):
+        margin = 24
+        draw_hearts(screen, player.lives, player.max_lives, (margin, margin),
+                    max_hearts=player.max_lives)
 
-        rects = []
-        for tower_index, tower in enumerate(towers):
-            x = left + tower_index * (tower_width + gap)
-            floors = tower["floors"]
-            for floor_index in range(len(floors)):
-                y = bottom - (floor_index + 1) * floor_height
-                rects.append((tower_index, floor_index, pygame.Rect(x, y, tower_width, floor_height)))
-        return rects
+        draw_power(screen, (WIDTH - margin, margin), getattr(player, "attack", None))
 
     def _draw_towers(self, screen):
         player = self.game.player
         towers = self.game.tower.towers
-        tower_width = 190
-        gap = 25
-        left = (WIDTH - (len(towers) * tower_width + (len(towers) - 1) * gap)) // 2
-        bottom = 440
-        floor_height = 48
+        left = self._left()
 
         for tower_index, tower in enumerate(towers):
-            x = left + tower_index * (tower_width + gap)
+            x = left + tower_index * (TOWER_WIDTH + GAP)
             floors = tower["floors"]
-            draw_text(screen, tower["name"], (x + tower_width // 2, bottom + 28), 20,
-                      COLORS["accent"] if tower_index == player.tower else COLORS["muted"], center=True)
-            pygame.draw.rect(screen, COLORS["panel"], (x, bottom - len(floors) * floor_height, tower_width,
-                                                        len(floors) * floor_height), border_radius=4)
-            pygame.draw.rect(screen, COLORS["muted"], (x, bottom - len(floors) * floor_height, tower_width,
-                                                        len(floors) * floor_height), 2, border_radius=4)
+            height = len(floors) * FLOOR_HEIGHT
+            top = BOTTOM - height
+            active = tower_index == player.tower
+
+            draw_text(screen, tower["name"], (x + TOWER_WIDTH // 2, BOTTOM + 28), 20,
+                      COLORS["accent"] if active else COLORS["muted"], center=True)
+
+            # translucent panel so the background shows through
+            panel = pygame.Surface((TOWER_WIDTH, height), pygame.SRCALPHA)
+            pygame.draw.rect(panel, (20, 14, 50, 205), panel.get_rect(), border_radius=8)
+            screen.blit(panel, (x, top))
+            pygame.draw.rect(screen, COLORS["accent"] if active else COLORS["muted"],
+                             (x, top, TOWER_WIDTH, height), 2, border_radius=8)
 
             for floor_index, floor in enumerate(floors):
-                y = bottom - (floor_index + 1) * floor_height
+                y = BOTTOM - (floor_index + 1) * FLOOR_HEIGHT
                 enemy_id = (tower_index, floor_index)
                 conquered = enemy_id in self.game.defeated
-                selectable = tower_index == player.tower and not conquered
+                selectable = active and not conquered
                 current = (tower_index == player.location_tower and
                            floor_index + 1 == player.location_floor)
-                color = COLORS["success"] if conquered else COLORS["accent"] if selectable else COLORS["muted"]
+                color = (COLORS["success"] if conquered
+                         else COLORS["accent"] if selectable else COLORS["muted"])
+
+                if conquered:
+                    tint = pygame.Surface((TOWER_WIDTH - 4, FLOOR_HEIGHT - 2), pygame.SRCALPHA)
+                    tint.fill((60, 200, 110, 45))
+                    screen.blit(tint, (x + 2, y + 1))
                 if selectable:
-                    pygame.draw.rect(screen, COLORS["accent"], (x + 1, y + 1, tower_width - 2, floor_height - 2), 1)
-                pygame.draw.line(screen, COLORS["muted"], (x, y), (x + tower_width, y), 1)
-                monster = floor["monster"]
-                label = f"{floor_index + 1}. {monster['name']}"
-                draw_text(screen, label, (x + 10, y + floor_height // 2 - 8), 16, color)
+                    pygame.draw.rect(screen, COLORS["accent"],
+                                     (x + 3, y + 3, TOWER_WIDTH - 6, FLOOR_HEIGHT - 6), 1,
+                                     border_radius=4)
+                if floor_index > 0:
+                    pygame.draw.line(screen, COLORS["muted"], (x + 6, y + FLOOR_HEIGHT),
+                                     (x + TOWER_WIDTH - 6, y + FLOOR_HEIGHT), 1)
+
+                label = f"{floor_index + 1}. {floor['monster']['name']}"
+                draw_text(screen, label, (x + 10, y + FLOOR_HEIGHT // 2 - 8), 16, color)
                 if current:
-                    draw_text(screen, "YOU", (x + tower_width - 32, y + floor_height // 2 - 8), 13,
+                    draw_text(screen, "YOU", (x + TOWER_WIDTH - 32, y + FLOOR_HEIGHT // 2 - 8), 13,
                               COLORS["text"], center=True)
