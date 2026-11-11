@@ -1,5 +1,4 @@
 from pathlib import Path
-
 import pygame
 
 from game.settings import COLORS, HEIGHT, WIDTH
@@ -8,40 +7,26 @@ from ui.button import Button
 from ui.hud import draw_bar
 from ui.text import draw_text
 
-HERE = Path(__file__).resolve().parent
-BG_CANDIDATES = [
-    HERE / "battle_bg.png",                                       # game/scenes/
-    HERE.parents[1] / "assets" / "images" / "battle_bg.png",      # assets/images/
-    HERE.parents[1] / "battle_bg.png",                            # project root
-    Path("game/scenes/battle_bg.png"),                            # relative to cwd
-]
-
 
 def load_background(size):
-    """Try several locations; fall back to a purple gradient so the game still runs."""
-    for path in BG_CANDIDATES:
-        if path.exists():
-            try:
-                return pygame.transform.scale(pygame.image.load(str(path)).convert(), size)
-            except pygame.error as err:
-                print(f"[battle] found {path} but could not load it: {err}")
-    print("[battle] battle_bg.png not found. Tried:")
-    for path in BG_CANDIDATES:
-        print("   ", path)
-    fallback = pygame.Surface(size)
-    for y in range(size[1]):
-        k = y / size[1]
-        fallback.fill((int(20 + 60 * k), int(15 + 30 * k), int(60 + 80 * k)), (0, y, size[0], 1))
-    return fallback
+    """ฟังก์ชันโหลดภาพพื้นหลังแบบระบุ Path ตรงๆ"""
+    bg_path = Path("game/scenes/battle_bg.png")
+    image = pygame.image.load(bg_path).convert()
+    return pygame.transform.scale(image, size)
 
 
 class BattleScene:
     def __init__(self, game):
         self.game = game
-        self.bg_image = load_background((WIDTH, HEIGHT))
 
-        self.attack = Button((WIDTH // 2 - 120, 500, 240, 54), "Attack", self.game.player_attack)
-        self.potion = Button((WIDTH // 2 - 120, 565, 240, 48), "Use Potion", self.game.player_potion)
+        # โหลดภาพพื้นหลังโดยระบุ Path ตรงๆ ไม่ต้องมี HERE
+        bg_path = Path("game/scenes/battle_bg.png")
+        image = pygame.image.load(bg_path).convert()
+        self.bg_image = pygame.transform.scale(image, (WIDTH, HEIGHT))
+
+        cx = WIDTH // 2
+        self.attack = Button((cx - 120, 500, 240, 54), "Attack", game.player_attack)
+        self.potion = Button((cx - 120, 565, 240, 48), "Use Potion", game.player_potion)
 
     def handle_event(self, event):
         self.attack.handle_event(event)
@@ -50,22 +35,20 @@ class BattleScene:
     def draw(self, screen):
         screen.blit(self.bg_image, (0, 0))
 
-        player, monster = self.game.player, self.game.monster
-        tower_name = self.game.tower.tower_name(player.tower)
+        p, m = self.game.player, self.game.monster
 
-        # HUD pills (top-left hearts, top-right POWER)
-        margin = 24
-        draw_hearts(screen, player.lives, player.max_lives, (margin, margin),
-                    max_hearts=player.max_lives)
-        draw_power(screen, (WIDTH - margin, margin), getattr(player, "attack", None))
+        # HUD เลือด และพลัง
+        draw_hearts(screen, p.lives, p.max_lives, (24, 24), max_hearts=p.max_lives)
+        draw_power(screen, (WIDTH - 24, 24), getattr(p, "attack", None))
 
-        draw_text(screen, f"{tower_name} - Floor {player.floor}: {monster.name}",
-                  (WIDTH // 2, 125), 32, COLORS["accent"], center=True)
-        draw_text(screen, player.name, (220, 170), 26, COLORS["text"], center=True)
-        draw_text(screen, monster.name, (740, 170), 26, COLORS["text"], center=True)
+        # ชื่อ ชั้น และเลือด
+        draw_text(screen, f"{self.game.tower.tower_name(p.tower)} Floor {p.floor}: {m.name}", (WIDTH // 2, 125), 32,
+                  COLORS["accent"], center=True)
+        draw_text(screen, p.name, (220, 170), 26, COLORS["text"], center=True)
+        draw_text(screen, m.name, (740, 170), 26, COLORS["danger"], center=True)
 
-        draw_bar(screen, (100, 220, 240, 22), player.health, player.max_health, COLORS["success"])
-        draw_bar(screen, (620, 220, 240, 22), monster.health, monster.max_health, COLORS["danger"])
+        draw_bar(screen, (100, 220, 240, 22), p.health, p.max_health, COLORS["success"])
+        draw_bar(screen, (620, 220, 240, 22), m.health, m.max_health, COLORS["danger"])
 
         draw_text(screen, self.game.message, (WIDTH // 2, 390), 20, COLORS["muted"], center=True)
 

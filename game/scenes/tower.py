@@ -25,7 +25,6 @@ class TowerScene:
                     break
         self.menu.handle_event(event)
 
-    # ------------------------------------------------------------ layout
     def _left(self):
         count = len(self.game.tower.towers)
         return (WIDTH - (count * TOWER_WIDTH + (count - 1) * GAP)) // 2
@@ -40,7 +39,6 @@ class TowerScene:
                               pygame.Rect(x, y, TOWER_WIDTH, FLOOR_HEIGHT)))
         return rects
 
-    # ------------------------------------------------------------- draw
     def draw(self, screen):
         screen.blit(self.bg_image, (0, 0))
         player = self.game.player
@@ -75,7 +73,6 @@ class TowerScene:
             draw_text(screen, tower["name"], (x + TOWER_WIDTH // 2, BOTTOM + 28), 20,
                       COLORS["accent"] if active else COLORS["muted"], center=True)
 
-            # translucent panel so the background shows through
             panel = pygame.Surface((TOWER_WIDTH, height), pygame.SRCALPHA)
             pygame.draw.rect(panel, (20, 14, 50, 205), panel.get_rect(), border_radius=8)
             screen.blit(panel, (x, top))
