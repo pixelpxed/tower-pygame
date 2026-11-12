@@ -17,6 +17,7 @@ def load_background(size):
 class BattleScene:
     def __init__(self, game):
         self.game = game
+        self.bg_image = load_background((WIDTH, HEIGHT))
 
         self.attack = Button((WIDTH // 2 - 120, 500, 240, 54), "Attack", self.game.player_attack)
 
@@ -26,7 +27,8 @@ class BattleScene:
     def draw(self, screen):
         screen.blit(self.bg_image, (0, 0))
 
-        p, m = self.game.player, self.game.monster
+        player, monster = self.game.player, self.game.monster
+        tower_name = self.game.tower.tower_name(player.tower)
 
         # HUD pills (top-left hearts, top-right POWER)
         margin = 24
