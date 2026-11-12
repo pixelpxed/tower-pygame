@@ -4,27 +4,15 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Monster:
     name: str
-    max_health: int
-    attack: int
-    gold: int
+    kind: str
+    power: int
+    item: str | None
     image: str = ""
 
-    def to_battle(self) -> "BattleMonster":
-        return BattleMonster(self.name, self.max_health, self.max_health, self.attack, self.gold, self.image)
-
-
-@dataclass
-class BattleMonster:
-    name: str
-    max_health: int
-    health: int
-    attack: int
-    gold: int
-    image: str = ""
-
-    @property
-    def alive(self) -> bool:
-        return self.health > 0
-
-    def take_damage(self, amount: int) -> None:
-        self.health = max(0, self.health - max(0, amount))
+    def __post_init__(self) -> None:
+        if self.kind not in {"enemy", "boss"}:
+            raise ValueError(f"Invalid enemy kind: {self.kind!r}")
+        if type(self.power) is not int or self.power < 0:
+            raise ValueError("Enemy power must be a non-negative integer")
+        if self.item not in (None, "stick", "lightsaber"):
+            raise ValueError(f"Invalid enemy item: {self.item!r}")

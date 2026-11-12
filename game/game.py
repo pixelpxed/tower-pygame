@@ -1,6 +1,5 @@
 import pygame
 
-from game.entities.item import Item
 from game.entities.player import Player
 from game.settings import DATA_DIR, FPS, HEIGHT, TITLE, WIDTH
 from game.systems.combat import Combat
@@ -10,7 +9,6 @@ from game.scenes.battle import BattleScene
 from game.scenes.game_over import GameOverScene
 from game.scenes.menu import MenuScene
 from game.scenes.tower import TowerScene
-from game.scenes.cut_scene import CutScene
 
 class Game:
     def __init__(self):
@@ -25,96 +23,60 @@ class Game:
         self.won = False
         self.defeated = set()
         self.tower = Tower(DATA_DIR / "towers.json")
-        self.potion = Item("Potion", "Restores health", 25)
         self.scene = MenuScene(self)
 
     def new_run(self):
         self.player.reset()
         self.won = False
         self.message = ""
+        self.monster = None
         self.defeated.clear()
         self.scene = TowerScene(self)
 
     def show_menu(self):
         self.scene = MenuScene(self)
 
-    def select_enemy(self, tower_index, floor_index):
-        enemy_id = (tower_index, floor_index)
-        if tower_index != self.player.tower or enemy_id in self.defeated:
+    def select_enemy(self, tower_index: int, floor_index: int) -> None:
+        if tower_index != self.player.tower or (tower_index, floor_index) in self.defeated:
+            return
+        if not 0 <= tower_index < len(self.tower.towers):
+            return
+        if not 0 <= floor_index < len(self.tower.floors_for_tower(tower_index)):
             return
 
-        self.player.location_tower = tower_index
-        self.player.location_floor = floor_index + 1
-        self.player.floor = floor_index + 1
-        self.monster = self.tower.monster_for_floor(tower_index, floor_index + 1)
-        self.message = f"A wild {self.monster.name} appears!"
+        self.player.position = (tower_index, floor_index)
+        self.monster = self.tower.monster_for_floor(tower_index, floor_index)
+        self.message = f"A {self.monster.kind} appears: {self.monster.name}!"
         self.scene = BattleScene(self)
 
-    def _finish_battle(self):
-        """Called after monster is defeated in BattleScene."""
-        player = self.player
+    def player_attack(self) -> None:
         monster = self.monster
-        tower_index = player.location_tower
-        floor_index = player.location_floor - 1
-        enemy_id = (tower_index, floor_index)
-
-        self.defeated.add(enemy_id)
-        Progression.reward_for_victory(player, monster)
-        recovered = player.health
-        player.heal(player.max_health)
-        recovered = player.health - recovered
-        self.message = (
-            f"{monster.name} defeated!"
-            f" Recovered {recovered} health."
-        )
-
-        tower_floor_count = len(self.tower.floors_for_tower(player.tower))
-        defeated_tower_floors = sum(
-            (player.tower, fi) in self.defeated
-            for fi in range(tower_floor_count)
-        )
-        if defeated_tower_floors == tower_floor_count:
-            player.tower += 1
-            player.floor = 1
-        if player.tower >= len(self.tower.towers):
-            self.won = True
-            self.message = "Every floor has been conquered."
-            self.scene = GameOverScene(self)
+        if monster is None or not self.player.alive or not isinstance(self.scene, BattleScene):
             return
 
-        self.scene = TowerScene(self)
-
-    def player_attack(self):
-        """Called by BattleScene Attack button."""
-        if self.monster is None or not self.monster.alive or not self.player.alive:
-            return
-
-        dealt = Combat.player_attack(self.player, self.monster)
-        if not self.monster.alive:
-            self.message = f"You dealt {dealt} damage. {self.monster.name} is defeated!"
-            self._finish_battle()
-            return
-
-        taken = Combat.monster_attack(self.player, self.monster)
-        self.message = f"You dealt {dealt} dmg. {self.monster.name} dealt {taken} dmg."
-
-        if not self.player.alive:
-            self.message = f"You were defeated by {self.monster.name}!"
-            self.won = False
-            self.scene = GameOverScene(self)
-
-    def player_potion(self):
-        """Called by BattleScene Use Potion button."""
-        if self.potion.use(self.player):
-            self.message = "You used a potion and recovered 25 health."
+        if Combat.resolve(self.player, monster):
+            previous_item = self.player.item or "None"
+            Progression.reward_for_victory(self.player, monster)
+            self.defeated.add(self.player.position)
+            self.message = (f"{monster.name} defeated! Power +{monster.power}. "
+                            f"Item: {previous_item} -> {self.player.item or 'None'}.")
+            if self.tower.tower_complete(self.player.tower, self.defeated):
+                self.player.tower += 1
+            if self.player.tower == len(self.tower.towers):
+                self.won = True
+                self.scene = GameOverScene(self)
+            else:
+                self.scene = TowerScene(self)
         else:
-            self.message = "Your health is already full!"
-
-    def use_potion(self):
-        if self.potion.use(self.player):
-            self.message = "You recovered 25 health."
-        else:
-            self.message = "Your health is already full."
+            if monster.kind == "boss":
+                self.message = f"{monster.name} defeated you! Boss defeat: all lives lost."
+            else:
+                self.message = f"{monster.name} defeated you! Lost one life."
+            if self.player.alive:
+                self.scene = TowerScene(self)
+            else:
+                self.won = False
+                self.scene = GameOverScene(self)
 
     def quit(self):
         self.running = False

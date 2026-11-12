@@ -1,5 +1,4 @@
 [
-  {"name": "Potion", "description": "Restores 25 health", "effect": 25, "kind": "heal"},
-  {"name": "Branch", "description": "A humble weapon", "effect": 3, "kind": "attack"},
-  {"name": "Lightsaber", "description": "A powerful weapon", "effect": 8, "kind": "attack"}
+  {"name": "stick", "multiplier": 0.9},
+  {"name": "lightsaber", "multiplier": 1.1}
 ]

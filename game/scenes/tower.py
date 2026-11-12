@@ -55,10 +55,12 @@ class TowerScene:
     @staticmethod
     def _draw_hud(screen, player):
         margin = 24
-        draw_hearts(screen, player.lives, player.max_lives, (margin, margin),
-                    max_hearts=player.max_lives)
+        draw_hearts(screen, player.lives, 3, (margin, margin),
+                    max_hearts=3)
 
-        draw_power(screen, (WIDTH - margin, margin), getattr(player, "attack", None))
+        draw_power(screen, (WIDTH - margin, margin), player.power)
+        draw_text(screen, f"Item: {player.item or 'None'}  |  Damage: {player.doable_damage:g}",
+                  (WIDTH - 180, 105), 20, COLORS["text"], center=True)
 
     def _draw_towers(self, screen):
         player = self.game.player
@@ -87,8 +89,7 @@ class TowerScene:
                 enemy_id = (tower_index, floor_index)
                 conquered = enemy_id in self.game.defeated
                 selectable = active and not conquered
-                current = (tower_index == player.location_tower and
-                           floor_index + 1 == player.location_floor)
+                current = (tower_index, floor_index) == player.position
                 color = (COLORS["success"] if conquered
                          else COLORS["accent"] if selectable else COLORS["muted"])
 

@@ -1,27 +1,13 @@
-from game.entities.monster import BattleMonster
+from game.entities.monster import Monster
 from game.entities.player import Player
 
 
 class Combat:
-
     @staticmethod
-    def player_attack(player: Player, monster: BattleMonster) -> int:
-        damage = player.deal_damage()
-        monster.take_damage(damage)
-        return damage
-
-    @staticmethod
-    def monster_attack(player: Player, monster: BattleMonster) -> int:
-        damage = monster.attack
-        player.take_damage(damage)
-        return damage
-
-    @staticmethod
-    def resolve_instantly(player: Player, monster: BattleMonster) -> tuple[int, int]:
-        damage_dealt = 0
-        damage_taken = 0
-        while player.alive and monster.alive:
-            damage_dealt += Combat.player_attack(player, monster)
-            if monster.alive:
-                damage_taken += Combat.monster_attack(player, monster)
-        return damage_dealt, damage_taken
+    def resolve(player: Player, monster: Monster) -> bool:
+        """Resolve one battle; rewards and floor completion are handled separately."""
+        if player.doable_damage > monster.power:
+            return True
+        player.lives = 0 if monster.kind == "boss" else max(0, player.lives - 1)
+        player.position = (0, 0)
+        return False

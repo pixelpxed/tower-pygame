@@ -13,5 +13,7 @@ python -m pip install -r requirements.txt
 python main.py
 ```
 
+Each battle compares your doable damage with the enemy’s power; you must exceed it to win. Victories add enemy power and replace your item. A normal loss costs one life, while a boss loss ends the run. Stick reduces damage to 90% of power and lightsaber increases it to 110%.
+
 The game data lives in `data/`. Add art and audio under `assets/` without
 changing the game systems.

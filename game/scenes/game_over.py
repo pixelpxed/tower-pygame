@@ -2,8 +2,9 @@ import math
 from pathlib import Path
 import pygame
 
-from game.settings import HEIGHT, WIDTH
+from game.settings import COLORS, HEIGHT, WIDTH
 from ui.battle_kub import HomeButton
+from ui.text import draw_text
 from game.scenes.cut_scene import CutScene
 
 HERE = Path(__file__).resolve().parent
@@ -16,7 +17,8 @@ def _load_bg(*names):
                      HERE.parents[1] / "assets" / "images" / name,
                      HERE.parents[1] / name,
                      Path("game/scenes") / name):
-            return pygame.transform.scale(pygame.image.load(str(path)).convert(),(WIDTH, HEIGHT))
+            if path.exists():
+                return pygame.transform.scale(pygame.image.load(str(path)).convert(), (WIDTH, HEIGHT))
     print(f"[game_over] {names[0]} not found. Using a plain background.")
     surf = pygame.Surface((WIDTH, HEIGHT))
     surf.fill((14, 18, 40))
@@ -89,5 +91,8 @@ class GameOverScene:
 
     def draw(self, screen):
         screen.blit(self.bg, (0, 0))
+        draw_text(screen, "Victory!" if self.game.won else "Game Over",
+                  (WIDTH // 2, 160), 48, COLORS["text"], center=True)
+        draw_text(screen, self.game.message, (WIDTH // 2, 220), 20, COLORS["text"], center=True)
         for button in self.buttons:
             button.draw(screen)

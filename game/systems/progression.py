@@ -1,8 +1,9 @@
+from game.entities.monster import Monster
+from game.entities.player import Player
+
+
 class Progression:
     @staticmethod
-    def reward_for_victory(player, monster) -> None:
-        player.gold += monster.gold
-
-    @staticmethod
-    def reward_text(monster) -> str:
-        return f"Victory! You received {monster.gold} gold."
+    def reward_for_victory(player: Player, monster: Monster) -> None:
+        player.power += monster.power
+        player.item = monster.item
