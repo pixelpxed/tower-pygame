@@ -1,10 +1,8 @@
 from pathlib import Path
-
 import pygame
-from game.settings import HEIGHT, WIDTH
 from PIL import Image
 
-HERE = Path(__file__).resolve().parent
+from game.settings import HEIGHT, WIDTH
 
 
 class _SkipButton:
@@ -25,17 +23,8 @@ class _SkipButton:
         pygame.draw.rect(screen, (0, 0, 0), r.move(0, 4), border_radius=r.h // 2)
         bg_color = (30, 35, 30) if hover else (12, 14, 18)
         pygame.draw.rect(screen, bg_color, r, border_radius=r.h // 2)
+
         screen.blit(self.label, self.label.get_rect(center=r.center))
-
-
-def _find(name):
-    for path in (HERE / name,
-                 HERE.parents[1] / "assets" / "images" / name,
-                 HERE.parents[1] / name,
-                 Path("game/scenes") / name):
-        if path.exists():
-            return path
-    return None
 
 
 class CutScene:
@@ -46,21 +35,26 @@ class CutScene:
         self.fade_ms = fade_ms
         self.finished = False
         self.start_ticks = None
-
         self.frames = self._preload_gif(gif_name)
         self.total_gif_duration = sum(dur for _, dur in self.frames) if self.frames else 1000
-
         self.fade_surface = pygame.Surface((WIDTH, HEIGHT)).convert()
         self.fade_surface.fill((0, 0, 0))
-
         margin, w, h = 24, 80, 80
-        self.skip = _SkipButton(pygame.Rect(WIDTH - margin - w, HEIGHT - margin - h, w, h),self._finish)
+        skip_rect = pygame.Rect(WIDTH - margin - w, HEIGHT - margin - h, w, h)
+        self.skip = _SkipButton(skip_rect, self._finish)
 
-    def _preload_gif(self, name):
+    def _preload_gif(self, name: str) -> list:
+        """โหลดและแปลงไฟล์ GIF เป็น Surface ของ Pygame ทีละเฟรม (ระบุ Path ตรงๆ ใช้ง่าย)"""
         if Image is None:
             print("[cutscene] Pillow is not installed. Skipping cutscene.")
             return []
-        path = _find(name)
+        search_paths = [
+            Path(name),
+            Path("assets/images") / name,
+            Path("game/scenes") / name,
+        ]
+
+        path = next((p for p in search_paths if p.exists()), None)
         if path is None:
             print(f"[cutscene] {name} not found. Skipping cutscene.")
             return []
@@ -71,24 +65,30 @@ class CutScene:
                 for frame_idx in range(getattr(img, "n_frames", 1)):
                     img.seek(frame_idx)
                     frame = img.convert("RGB")
+
                     if frame.size != (WIDTH, HEIGHT):
                         frame = frame.resize((WIDTH, HEIGHT))
+
                     surf = pygame.image.frombytes(frame.tobytes(), frame.size, "RGB").convert()
                     duration = max(20, img.info.get("duration", 40))
                     frames.append((surf, duration))
         except Exception as err:
             print(f"[cutscene] Could not process {path}: {err}")
+
         return frames
 
-    def _get_current_frame(self, elapsed):
+    def _get_current_frame(self, elapsed: int):
         if not self.frames:
             return None
+
         loop_time = elapsed % self.total_gif_duration
         accum = 0
+
         for surf, duration in self.frames:
             accum += duration
             if loop_time < accum:
                 return surf
+
         return self.frames[-1][0]
 
     def _finish(self):
@@ -104,25 +104,25 @@ class CutScene:
             return
         self.skip.handle_event(event)
 
-    def draw(self, screen):
+    def draw(self, screen: pygame.Surface):
         now = pygame.time.get_ticks()
         if self.start_ticks is None:
             self.start_ticks = now
         elapsed = now - self.start_ticks
 
         screen.fill((0, 0, 0))
-
         frame_surf = self._get_current_frame(elapsed)
         if frame_surf is not None:
             screen.blit(frame_surf, (0, 0))
 
         alpha = 0
         if elapsed < self.fade_ms:
-            # Fade In
+            #FadeIn
             progress = elapsed / self.fade_ms
             alpha = int(255 * (1.0 - progress))
+
         elif elapsed > (self.duration_ms - self.fade_ms):
-            # Fade Out
+            #Fade Out
             progress = (elapsed - (self.duration_ms - self.fade_ms)) / self.fade_ms
             alpha = int(255 * progress)
 

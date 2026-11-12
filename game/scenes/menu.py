@@ -21,7 +21,6 @@ class MenuScene:
         self.quit = Button((button_x, button_y + button_height + 50, button_width, button_height), "G I V E    U P", self.game.quit)
 
     def _start(self):
-        # Start -> cut scene (GIF, 3 s, SKIP button) -> game.new_run()
         self.game.scene = CutScene(self.game)
 
     def handle_event(self, event):
