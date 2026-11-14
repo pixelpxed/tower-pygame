@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class Monster:
+class BattleMonster:
     name: str
     kind: str
     power: int

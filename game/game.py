@@ -1,13 +1,20 @@
 import pygame
 
+from game.entities.item import Item
 from game.entities.player import Player
 from game.settings import DATA_DIR, FPS, HEIGHT, TITLE, WIDTH
 from game.systems.combat import Combat
 from game.systems.progression import Progression
 from game.systems.tower import Tower
+from game.scenes.battle import BattleScene
 from game.scenes.game_over import GameOverScene
+from game.scenes.end_lost import EndLostScene
+from game.scenes.end_win import EndWinScene
 from game.scenes.menu import MenuScene
 from game.scenes.tower import TowerScene
+from game.scenes.cut_scene import CutScene
+from game.scenes.story import StoryScene
+
 
 class Game:
     def __init__(self):
@@ -30,6 +37,12 @@ class Game:
         self.message = ""
         self.monster = None
         self.defeated.clear()
+        self.scene = StoryScene(self, on_done=self.show_cutscene)
+
+    def show_cutscene(self):
+        self.scene = CutScene(self, on_done=self.start_tower)
+
+    def start_tower(self):
         self.scene = TowerScene(self)
 
     def show_menu(self):
@@ -94,6 +107,10 @@ class Game:
                     self.scene.handle_event(event)
             if isinstance(self.scene, TowerScene):
                 self.scene.update(dt_ms)
+            else:
+                update = getattr(self.scene, "update", None)
+                if update is not None:
+                    update(dt_ms / 1000)
             self.scene.draw(self.screen)
             pygame.display.flip()
         pygame.quit()

@@ -6,22 +6,6 @@ from ui.battle_kub import HomeButton
 from game.scenes.cut_scene import CutScene
 
 BLACK = (15, 15, 20)
-
-
-# def _load_bg(*names):
-#     for name in names:
-#         for path in (HERE / name,
-#                      HERE.parents[1] / "assets" / "images" / name,
-#                      HERE.parents[1] / name,
-#                      Path("game/scenes") / name):
-#             if path.exists():
-#                 return pygame.transform.scale(pygame.image.load(str(path)).convert(), (WIDTH, HEIGHT))
-#     print(f"[game_over] {names[0]} not found. Using a plain background.")
-#     surf = pygame.Surface((WIDTH, HEIGHT))
-#     surf.fill((14, 18, 40))
-#     return surf
-
-
 class RestartButton:
     def __init__(self, center: tuple, callback, size: int = 96):
         self.rect = pygame.Rect(0, 0, size, size)
@@ -59,8 +43,8 @@ class GameOverScene:
             else:
                 game.scene = CutScene(game, on_done=game.show_menu)
 
-        bg_filename = "VICTORY.jpg" if game.won else "DEFEATED.jpg"
-        image_path = Path("game/scenes/") / bg_filename
+        bg_filename = "VICTORY.png" if game.won else "DEFEATED.png"
+        image_path = Path("game/scenes/image/") / bg_filename
 
         if image_path.exists():
             image = pygame.image.load(str(image_path)).convert()
@@ -76,7 +60,8 @@ class GameOverScene:
         else:
             offset = size // 2 + 25
             self.buttons = [
-                RestartButton((WIDTH // 2 - offset, y), game.new_run, size=size),
+                # แพ้แล้วกลับไปสู้ตัวเดิม (หัวใจหมดจะเริ่มเกมใหม่เอง)
+                RestartButton((WIDTH // 2 - offset, y), getattr(game, "retry_battle", game.new_run), size=size),
                 HomeButton((WIDTH // 2 + offset, y), game.show_menu, size=size),
             ]
 

@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from game.entities.monster import Monster
+from game.entities.monster import BattleMonster
 
 
 class Tower:
@@ -14,18 +14,18 @@ class Tower:
             if not isinstance(tower["floors"], list) or not tower["floors"]:
                 raise ValueError("Each tower must contain at least one floor")
             for floor in tower["floors"]:
-                Monster(**floor["monster"])
+                BattleMonster(**floor["monster"])
 
     def floors_for_tower(self, tower: int) -> list[dict]:
         if not 0 <= tower < len(self.towers):
             raise IndexError("Invalid tower index")
         return self.towers[tower]["floors"]
 
-    def monster_for_floor(self, tower: int, floor: int) -> Monster:
+    def monster_for_floor(self, tower: int, floor: int) -> BattleMonster:
         floors = self.floors_for_tower(tower)
         if not 0 <= floor < len(floors):
             raise IndexError("Invalid floor index")
-        return Monster(**floors[floor]["monster"])
+        return BattleMonster(**floors[floor]["monster"])
 
     def tower_complete(self, tower: int, defeated: set[tuple[int, int]]) -> bool:
         return all((tower, floor) in defeated for floor in range(len(self.floors_for_tower(tower))))

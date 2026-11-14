@@ -2,14 +2,14 @@ from pathlib import Path
 import pygame
 
 from game.settings import COLORS, HEIGHT, WIDTH
-from ui.battle_kub import draw_hearts, draw_power
+from ui.battle_kub import BackButton, draw_hearts, draw_power
 from ui.button import Button
+from ui.hud import draw_bar
 from ui.text import draw_text
 
 
 def load_background(size):
-    """ฟังก์ชันโหลดภาพพื้นหลังแบบระบุ Path ตรงๆ"""
-    bg_path = Path("game/scenes/battle_bg.png")
+    bg_path = Path("game/scenes/image/battle_bg.png")
     image = pygame.image.load(bg_path).convert()
     return pygame.transform.scale(image, size)
 

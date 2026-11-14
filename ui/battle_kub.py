@@ -1,7 +1,6 @@
 import math
 import pygame
 
-# --- สีที่ใช้งานใน UI (Constants) ---
 WHITE = (255, 255, 255)
 BLACK = (15, 15, 20)
 HEART_FILL_COLOR = (255, 70, 120)
@@ -29,6 +28,16 @@ HOUSE = [
     ".XXXXXXX.",
     ".XXX.XXX.",
     ".XXX.XXX.",
+]
+
+BACK_ARROW = [
+    "...X....",
+    "..XX....",
+    ".XXXXXXX",
+    "XXXXXXXX",
+    ".XXXXXXX",
+    "..XX....",
+    "...X....",
 ]
 
 
@@ -106,7 +115,7 @@ def draw_power(surf: pygame.Surface, topright: tuple, value: int = None) -> pyga
     label = pixel_text("POWER", BLACK, (label_w, label_h))
     surf.blit(label, label.get_rect(midright=(rect.right - round(30 * k), rect.centery)))
 
-    # แสดงตัวเลขค่าพลัง (ถ้ามีการส่งค่ามา)
+    # ค่าพลัง
     if value is not None:
         num_str = str(value)
         num_w = round(26 * len(num_str) * k)
@@ -141,6 +150,37 @@ class HomeButton:
         y0 = self.rect.centery - len(HOUSE) * cell // 2
 
         for r, row in enumerate(HOUSE):
+            for c, ch in enumerate(row):
+                if ch == "X":
+                    surf.fill(BLACK, (x0 + c * cell, y0 + r * cell, cell, cell))
+
+
+class BackButton:
+    """ปุ่มวงกลมลูกศรย้อนกลับ สไตล์เดียวกับ HomeButton"""
+
+    def __init__(self, center: tuple, callback, size: int = 64):
+        self.rect = pygame.Rect(0, 0, size, size)
+        self.rect.center = center
+        self.callback = callback
+
+    def handle_event(self, event: pygame.event.Event):
+        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            if self.rect.collidepoint(event.pos):
+                self.callback()
+
+    def draw(self, surf: pygame.Surface):
+        hover = self.rect.collidepoint(pygame.mouse.get_pos())
+        bg_color = HOVER_CIRCLE_COLOR if hover else WHITE
+        pygame.draw.circle(surf, bg_color, self.rect.center, self.rect.w // 2)
+
+        if hover:
+            pygame.draw.circle(surf, HOVER_BORDER_COLOR, self.rect.center, self.rect.w // 2, 4)
+
+        cell = max(3, self.rect.w // 14)
+        x0 = self.rect.centerx - len(BACK_ARROW[0]) * cell // 2
+        y0 = self.rect.centery - len(BACK_ARROW) * cell // 2
+
+        for r, row in enumerate(BACK_ARROW):
             for c, ch in enumerate(row):
                 if ch == "X":
                     surf.fill(BLACK, (x0 + c * cell, y0 + r * cell, cell, cell))
