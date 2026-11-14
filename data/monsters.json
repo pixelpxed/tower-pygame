@@ -1,0 +1,6 @@
+[
+  {"name": "Slime", "health": 35, "attack": 6, "gold": 10},
+  {"name": "Goblin", "health": 55, "attack": 9, "gold": 20},
+  {"name": "Skeleton", "health": 80, "attack": 13, "gold": 35},
+  {"name": "Tower Boss", "health": 120, "attack": 18, "gold": 100}
+]
