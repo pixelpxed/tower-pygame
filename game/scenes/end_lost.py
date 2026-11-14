@@ -13,31 +13,31 @@ class EndLostScene:
                 "bg": "3.png",
                 "speaker": "Alien Cat B1",
                 "text": "Oh no... he fainted completely.",
-                "sound": None
+                "sound": "talk.mp3"
             },
             {
                 "bg": "3.png",
                 "speaker": "Alien Cat B2",
                 "text": "B1, I think he's not the same with us...",
-                "sound": None
+                "sound": "talk.mp3"
             },
             {
                 "bg": "3.png",
                 "speaker": "Alien Cat B1",
                 "text": "Wait...  ",
-                "sound": None
+                "sound": "talk.mp3"
             },
             {
                 "bg": "3.png",
                 "speaker": "Alien Cat B1",
                 "text": "Then why dont we just turned him like ourself?",
-                "sound": None
+                "sound": "talk.mp3"
             },
             {
                 "bg": "3.png",
                 "speaker": "Alien Cat B2",
                 "text": "Great idea,B1!",
-                "sound": None
+                "sound": "talk.mp3"
             },
             {
                 "bg": "end_lost.png",

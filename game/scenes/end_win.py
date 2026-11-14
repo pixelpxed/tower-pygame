@@ -7,13 +7,10 @@ from ui.text import draw_text
 class EndWinScene:
     def __init__(self, game, on_done=None, script=None):
         self.game = game
-        # กำหนด on_done สำรองเมื่อจบฉากนี้ (เช่น กลับไปหน้าเมนูหลัก)
         self.on_done = on_done or getattr(game, "show_menu", game.new_run)
-
-        # Script สำหรับเหตุการณ์ตอนชนะ (สามารถปรับเปลี่ยนข้อความ, รูปภาพ, และเสียงได้ตามต้องการ)
         self.script = script or [
             {
-                "bg": "black.jpg",  # เปลี่ยนชื่อไฟล์ภาพฉากชนะตามต้องการ
+                "bg": "black.jpg",
                 "speaker": "Alien Cat",
                 "text": "m'aider m'aider ... m'aider ",
                 "sound": "talk.mp3"
@@ -46,25 +43,25 @@ class EndWinScene:
                 "bg": "end_win0.png",
                 "speaker": "(You)",
                 "text": "Finally! I got back home!",
-                "sound": None
+                "sound": "meow.mp3"
             },
             {
                 "bg": "end_win0.png",
                 "speaker": "(You)",
                 "text": "Hope I won't get kidnapped by aliens again",
-                "sound": None
+                "sound": "meow.mp3"
             },
             {
                 "bg": "end_win0.png",
                 "speaker": "(You)",
                 "text": "Let's just go back to sleep. . .",
-                "sound": None
+                "sound": "meow.mp3"
             },
             {
                 "bg": "2.png",
                 "speaker": "(You)",
                 "text": ". . .",
-                "sound": None
+                "sound": "meow.mp3"
             },
             {
                 "bg": "2.png",
@@ -87,28 +84,18 @@ class EndWinScene:
         ]
 
         self.current_line_idx = 0
-
-        # ตัวแปรเก็บภาพพื้นหลังปัจจุบัน
         self.current_bg = None
         self._load_current_background()
 
-        # ตัวแปรสำหรับการพิมพ์ข้อความทีละตัวอักษร (Typewriter Effect)
         self.current_text = ""
         self.target_text = self.script[0]["text"]
         self.char_index = 0
         self.text_timer = 0
-        self.text_speed = 35  # ความเร็วในการพิมพ์ (มิลลิวินาที)
+        self.text_speed = 35
         self.is_finished_typing = False
-        self.has_played_sound = False  # ตัวแปรเช็คสถานะการเล่นเสียงประจำบรรทัด
-
-        # โหลดเสียง Soundboard พื้นฐาน (สำหรับเสียงพิมพ์ตัวหนังสือ)
-        self.blip_sound = self._load_sound("text_blip.wav")
-
-        # จัดการเสียงเพลงพื้นหลัง (Background Music สำหรับฉากชนะ)
-        self._manage_background_music()
+        self.has_played_sound = False
 
     def _load_current_background(self):
-        """โหลดรูปภาพพื้นหลัง พร้อมปรับให้ขยายแบบ Pixel Art (ไม่เบลอ)"""
         bg_name = self.script[self.current_line_idx]["bg"]
         bg_path = Path("game/scenes/image") / bg_name
 
@@ -118,7 +105,7 @@ class EndWinScene:
         else:
             print(f"[EndWinScene] Warning: Background image not found at {bg_path}")
             surf = pygame.Surface((WIDTH, HEIGHT))
-            surf.fill((10, 20, 30))  # สีพื้นหลังโทนสว่าง/อวกาศสำรองกรณีหาภาพไม่พบ
+            surf.fill((10, 20, 30))
             self.current_bg = surf
 
     def _load_sound(self, name):
@@ -129,16 +116,6 @@ class EndWinScene:
             except:
                 pass
         return None
-
-    def _manage_background_music(self):
-        """จัดการเพลงพื้นหลังประจำฉากชนะ"""
-        bg_music_path = Path("game/scenes/soundeffect") / "win_theme.mp3"  # เปลี่ยนชื่อเพลงชนะตามต้องการ
-        if bg_music_path.exists() and not pygame.mixer.music.get_busy():
-            try:
-                pygame.mixer.music.load(str(bg_music_path))
-                pygame.mixer.music.play(-1)
-            except Exception as e:
-                print(f"[EndWinScene] Cannot play BGM: {e}")
 
     def _play_current_sound(self):
         sound_name = self.script[self.current_line_idx].get("sound")
@@ -163,7 +140,6 @@ class EndWinScene:
             self.char_index = len(self.target_text)
             self.is_finished_typing = True
 
-            # ถ้ากดคลิกข้ามตอนกำลังพิมพ์ แล้วเสียงยังไม่เคยเล่น ให้เล่นเสียงดักไว้เลย
             if not self.has_played_sound:
                 self._play_current_sound()
                 self.has_played_sound = True
@@ -174,33 +150,26 @@ class EndWinScene:
                 self.current_text = ""
                 self.char_index = 0
                 self.is_finished_typing = False
-                self.has_played_sound = False  # รีเซ็ตสถานะเสียงสำหรับบรรทัดใหม่
+                self.has_played_sound = False
 
                 self._load_current_background()
-                self._manage_background_music()
             else:
                 pygame.mixer.music.stop()
                 self.on_done()
 
     def update(self, dt):
-        """เอฟเฟกต์ตัวอักษรวิ่งทีละตัว และซิงค์เสียงพูดให้มาพร้อมข้อความตัวแรก"""
         if not self.is_finished_typing:
             self.text_timer += dt * 1000
             if self.text_timer >= self.text_speed:
                 self.text_timer = 0
                 if self.char_index < len(self.target_text):
-                    # เติมตัวอักษรทีละตัว
                     self.current_text += self.target_text[self.char_index]
                     self.char_index += 1
 
-                    # ทันทีที่ตัวอักษรตัวแรกปรากฏขึ้น ให้เล่นเสียงพูดทันที
                     if self.char_index == 1 and not self.has_played_sound:
                         self._play_current_sound()
                         self.has_played_sound = True
 
-                    # เสียงพิมพ์ตัวหนังสือ
-                    if self.blip_sound and self.char_index % 2 == 0:
-                        self.blip_sound.play()
                 else:
                     self.is_finished_typing = True
 
@@ -214,7 +183,6 @@ class EndWinScene:
         box_y = HEIGHT - 160
         box_rect = pygame.Rect(box_x, box_y, box_width, box_height)
 
-        # Stardew Valley Theme Colors
         c_outline = (58, 25, 11)
         c_wood_dark = (145, 72, 24)
         c_wood_mid = (204, 118, 43)

@@ -44,7 +44,6 @@ class CutScene:
         self.fade_surface.fill((0, 0, 0))
         self.tint_surface = pygame.Surface((WIDTH, HEIGHT)).convert()
 
-    # ------------------------------------------------------------------ load
     def _load(self, name):
         path = IMAGE_DIR / name
         if not path.exists():
@@ -57,7 +56,6 @@ class CutScene:
             print(f"[cutscene] Could not load {path}: {err}")
             return None
 
-    # --------------------------------------------------------------- control
     def _finish(self):
         if self.finished:
             return
@@ -70,7 +68,6 @@ class CutScene:
                 pygame.K_ESCAPE, pygame.K_SPACE, pygame.K_RETURN, pygame.K_KP_ENTER):
             self._finish()
 
-    # ------------------------------------------------------------------ draw
     def _switch(self):
         self.idx = (self.idx + 1) % len(self.frames)
         self.tint = random.choice(TINTS)
@@ -78,12 +75,11 @@ class CutScene:
 
     def _draw_skip_hint(self, screen):
         pos = (WIDTH // 2, HEIGHT - 32)
-        # เงาดำ ให้อ่านออกแม้ภาพข้างหลังสว่างหรือกะพริบ
         draw_text(screen, SKIP_HINT, (pos[0] + 2, pos[1] + 2), 20, (0, 0, 0), center=True)
         draw_text(screen, SKIP_HINT, pos, 20, (255, 255, 255), center=True)
 
     def draw(self, screen):
-        if not self.frames:  # ไม่มีภาพเลย ข้ามฉากไปเลย
+        if not self.frames:
             self._finish()
             return
 
@@ -101,7 +97,6 @@ class CutScene:
         p = min(1.0, elapsed / DURATION_MS)
         speed = _ease(p)  # 0 -> 1 : ยิ่งนานยิ่งเร็วขึ้น
 
-        # สลับภาพ: ช่วงเวลาระหว่างภาพหดลงเรื่อยๆ
         interval = START_INTERVAL + (END_INTERVAL - START_INTERVAL) * speed
         if now - self.last_switch >= interval:
             self.last_switch = now
@@ -114,7 +109,6 @@ class CutScene:
             inv.blit(frame, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
             frame = inv
 
-        # ซูมกระตุกตามจังหวะ + โยกหมุน + สั่น (รุนแรงขึ้นตามเวลา)
         beat = (now - self.last_switch) / max(1, interval)  # 0..1 ภายในแต่ละภาพ
         punch = (1.0 - min(1.0, beat)) ** 2  # แรงสุดตอนเพิ่งสลับ
         zoom = 1.08 + 0.12 * punch * (0.5 + speed)
@@ -132,12 +126,10 @@ class CutScene:
         screen.fill((0, 0, 0))
         screen.blit(frame, rect)
 
-        # ฉายสีทับกะพริบ (additive) ตอนเพิ่งสลับภาพ
         if FLASH_EFFECTS and punch > 0.05:
             self.tint_surface.fill(tuple(int(c * punch * 0.55) for c in self.tint))
             screen.blit(self.tint_surface, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
 
-        # แฟลชขาวตอนเริ่ม และเฟดดำตอนจบ
         alpha = 0
         if elapsed < 250:
             if FLASH_EFFECTS:
@@ -152,8 +144,6 @@ class CutScene:
         if alpha:
             self.fade_surface.set_alpha(alpha)
             screen.blit(self.fade_surface, (0, 0))
-
-        # วาดทับสุดท้าย เพื่อให้ข้อความไม่ถูกแฟลช/เฟดบัง (เฟดดำตอนจบก็ยังเห็นชัด)
         self._draw_skip_hint(screen)
 
         if elapsed >= DURATION_MS:

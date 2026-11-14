@@ -6,7 +6,7 @@ class Player:
     name: str = "Hero"
     max_health: int = 100
     health: int = 100
-    attack: int = 100 #ชั้นตั้งไว้ตอนเทสเฉยๆ ฝากเปลี่ยนกลับด้วยอิอิ
+    attack: int = 5 #ชั้นตั้งไว้ตอนเทสเฉยๆ ฝากเปลี่ยนกลับด้วยอิอิ
     tower: int = 0
     floor: int = 1
     location_tower: int = 0

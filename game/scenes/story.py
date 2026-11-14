@@ -108,34 +108,24 @@ class StoryScene:
 ]
         self.current_line_idx = 0
 
-        # ตัวแปรเก็บภาพพื้นหลังปัจจุบัน
         self.current_bg = None
         self._load_current_background()
 
-        # ตัวแปรสำหรับการพิมพ์ข้อความทีละตัวอักษร (Typewriter Effect)
         self.current_text = ""
         self.target_text = self.script[0]["text"]
         self.char_index = 0
         self.text_timer = 0
-        self.text_speed = 35  # ความเร็วในการพิมพ์ (มิลลิวินาที)
+        self.text_speed = 35
         self.is_finished_typing = False
-        self.has_played_sound = False  # ตัวแปรเช็คสถานะการเล่นเสียงประจำบรรทัด
-
-        # โหลดเสียง Soundboard พื้นฐาน (สำหรับเสียงพิมพ์ตัวหนังสือ)
-        self.blip_sound = self._load_sound("text_blip.wav")
-
-        # จัดการเสียงเพลงพื้นหลัง (Background Music สำหรับช่วง 1.png)
+        self.has_played_sound = False
         self._manage_background_music()
 
     def _load_current_background(self):
-        """โหลดรูปภาพพื้นหลัง พร้อมปรับให้ขยายแบบ Pixel Art (ไม่เบลอ)"""
         bg_name = self.script[self.current_line_idx]["bg"]
         bg_path = Path("game/scenes/image") / bg_name
 
         if bg_path.exists():
             image = pygame.image.load(str(bg_path)).convert()
-            # ใช้ pygame.transform.scale ปกติ แต่ถ้าต้องการให้แตกเป็นเม็ดพิกเซลชัดๆ
-            # สามารถใช้ pygame.transform.scale แบบพิกเซลได้ หรือถ้าภาพต้นฉบับคมอยู่แล้ว ตัวนี้เอาอยู่ครับ
             self.current_bg = pygame.transform.scale(image, (WIDTH, HEIGHT))
         else:
             print(f"[StoryScene] Warning: Background image not found at {bg_path}")
@@ -153,7 +143,6 @@ class StoryScene:
         return None
 
     def _manage_background_music(self):
-        """จัดการเพลงพื้นหลัง: ถ้าอยู่หน้า 1.png ให้เล่นวนไปเรื่อยๆ ถ้าพ้นแล้วให้หยุด"""
         current_bg = self.script[self.current_line_idx]["bg"]
         bg_music_path = Path("game/scenes/soundeffect") / "farm.mp3"
 
@@ -189,7 +178,6 @@ class StoryScene:
             self.char_index = len(self.target_text)
             self.is_finished_typing = True
 
-            # ถ้ากดคลิกข้ามตอนกำลังพิมพ์ แล้วเสียงยังไม่เคยเล่น ให้เล่นเสียงดักไว้เลย
             if not self.has_played_sound:
                 self._play_current_sound()
                 self.has_played_sound = True
@@ -214,18 +202,13 @@ class StoryScene:
             if self.text_timer >= self.text_speed:
                 self.text_timer = 0
                 if self.char_index < len(self.target_text):
-                    # เติมตัวอักษรทีละตัว
                     self.current_text += self.target_text[self.char_index]
                     self.char_index += 1
 
-                    # ทันทีที่ตัวอักษรตัวแรกปรากฏขึ้น (char_index == 1) ให้สั่งเล่นเสียงพูดทันที!
                     if self.char_index == 1 and not self.has_played_sound:
                         self._play_current_sound()
                         self.has_played_sound = True
 
-                    # เสียงก๊อกแก๊กพิมพ์ตัวหนังสือ
-                    if self.blip_sound and self.char_index % 2 == 0:
-                        self.blip_sound.play()
                 else:
                     self.is_finished_typing = True
 
@@ -288,7 +271,6 @@ class StoryScene:
         draw_text(screen, current_speaker, (text_x, text_y), font_size, c_text)
         draw_text(screen, self.current_text, (box_rect.x + 25, box_rect.y + 30), 20, c_text)
 
-        # 5. วาดไอคอนสามเหลี่ยมพิกเซลตรงมุมขวาล่างเมื่อพิมพ์จบ
         if self.is_finished_typing:
             btn_rect = pygame.Rect(box_rect.right - 34, box_rect.bottom - 30, 16, 16)
             pygame.draw.rect(screen, c_wood_mid, btn_rect)

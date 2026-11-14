@@ -114,20 +114,18 @@ class Game:
             self.message = f"You were defeated by {self.monster.name}!"
             self.won = False
             if self.player.lives <= 0:
-                self.scene = EndLost(self)       # แพ้ครบ 3 ครั้ง -> จบเกมแบบแพ้
+                self.scene = EndLostScene(self)       # แพ้ครบ 3 ครั้ง -> จบเกมแบบแพ้
             else:
                 self.scene = GameOverScene(self) # ยังมีหัวใจเหลือ -> กด ↺ สู้ตัวเดิมต่อ
 
     def retry_battle(self):
-        """แพ้แล้วกลับไปสู้มอนสเตอร์ตัวเดิม (หัวใจถูกหักไปแล้วตอนแพ้)"""
-        if self.player.lives <= 0:               # กันไว้เฉยๆ ปกติจะไปหน้า EndLost แล้ว
-            self.scene = EndLost(self)
+        if self.player.lives <= 0:
+            self.scene = EndLostScene(self)
             return
         self.player.heal(self.player.max_health)
         self.select_enemy(self.player.location_tower, self.player.location_floor - 1)
 
     def back_to_tower(self):
-        """ย้อนกลับจากหน้าสู้ไปหน้าเลือกมอนสเตอร์ (เลือดผู้เล่นไม่ถูกรีเซ็ต)"""
         self.monster = None
         self.message = ""
         self.scene = TowerScene(self)
