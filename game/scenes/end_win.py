@@ -230,10 +230,8 @@ class EndWinScene:
 
         draw_text(screen, current_speaker, (text_x, text_y), font_size, c_text)
 
-        # แสดงข้อความบทสนทนาภายในกล่อง
         draw_text(screen, self.current_text, (box_rect.x + 25, box_rect.y + 30), 18, c_text)
 
-        # วาดไอคอนสามเหลี่ยมพิกเซลตรงมุมขวาล่างเมื่อพิมพ์จบ
         if self.is_finished_typing:
             btn_rect = pygame.Rect(box_rect.right - 34, box_rect.bottom - 30, 16, 16)
             pygame.draw.rect(screen, c_wood_mid, btn_rect)

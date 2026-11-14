@@ -50,7 +50,31 @@ class EndLostScene:
                 "speaker": ". . .",
                 "text": "And stuck with them FOREVER . . .",
                 "sound": None
-            }
+            },
+            {
+                "bg": "black.jpg",
+                "speaker": ". . .",
+                "text": ". . .",
+                "sound": None
+            },
+            {
+                "bg": "black.jpg",
+                "speaker": ". . .",
+                "text": "You got turned into Alien Cat",
+                "sound": None
+            },
+            {
+                "bg": "black.jpg",
+                "speaker": ". . .",
+                "text": "There is no way to get you back home",
+                "sound": None
+            },
+            {
+                "bg": "black.jpg",
+                "speaker": ". . .",
+                "text": "You are them now...",
+                "sound": None
+            },
         ]
 
         self.current_line_idx = 0
@@ -60,14 +84,8 @@ class EndLostScene:
         self.current_text = ""
         self.target_text = self.script[0]["text"]
         self.char_index = 0
-        self.text_timer = 0
-        self.text_speed = 35
         self.is_finished_typing = False
         self.has_played_sound = False
-
-        self.blip_sound = self._load_sound("text_blip.wav")
-
-        self._manage_background_music()
 
     def _load_current_background(self):
         bg_name = self.script[self.current_line_idx]["bg"]
@@ -90,16 +108,6 @@ class EndLostScene:
             except:
                 pass
         return None
-
-    def _manage_background_music(self):
-        """จัดการเพลงพื้นหลังประจำฉากแพ้"""
-        bg_music_path = Path("game/scenes/soundeffect") / "lost_theme.mp3"  # เปลี่ยนชื่อเพลงตามต้องการ
-        if bg_music_path.exists() and not pygame.mixer.music.get_busy():
-            try:
-                pygame.mixer.music.load(str(bg_music_path))
-                pygame.mixer.music.play(-1)
-            except Exception as e:
-                print(f"[EndLostScene] Cannot play BGM: {e}")
 
     def _play_current_sound(self):
         sound_name = self.script[self.current_line_idx].get("sound")
@@ -135,33 +143,25 @@ class EndLostScene:
                 self.current_text = ""
                 self.char_index = 0
                 self.is_finished_typing = False
-                self.has_played_sound = False  # รีเซ็ตสถานะเสียงสำหรับบรรทัดใหม่
+                self.has_played_sound = False
 
                 self._load_current_background()
-                self._manage_background_music()
             else:
                 pygame.mixer.music.stop()
                 self.on_done()
 
     def update(self, dt):
-        """เอฟเฟกต์ตัวอักษรวิ่งทีละตัว และซิงค์เสียงพูดให้มาพร้อมข้อความตัวแรก"""
         if not self.is_finished_typing:
             self.text_timer += dt * 1000
             if self.text_timer >= self.text_speed:
                 self.text_timer = 0
                 if self.char_index < len(self.target_text):
-                    # เติมตัวอักษรทีละตัว
                     self.current_text += self.target_text[self.char_index]
                     self.char_index += 1
-
-                    # ทันทีที่ตัวอักษรตัวแรกปรากฏขึ้น ให้เล่นเสียงพูดทันที
                     if self.char_index == 1 and not self.has_played_sound:
                         self._play_current_sound()
                         self.has_played_sound = True
 
-                    # เสียงพิมพ์ตัวหนังสือ
-                    if self.blip_sound and self.char_index % 2 == 0:
-                        self.blip_sound.play()
                 else:
                     self.is_finished_typing = True
 
@@ -175,7 +175,6 @@ class EndLostScene:
         box_y = HEIGHT - 160
         box_rect = pygame.Rect(box_x, box_y, box_width, box_height)
 
-        # Stardew Valley Theme Colors (หรือปรับโทนสีกล่องข้อความตามชอบ เช่น โทนหม่นๆ สำหรับตอนแพ้)
         c_outline = (58, 25, 11)
         c_wood_dark = (145, 72, 24)
         c_wood_mid = (204, 118, 43)
@@ -223,10 +222,8 @@ class EndLostScene:
 
         draw_text(screen, current_speaker, (text_x, text_y), font_size, c_text)
 
-        # แสดงข้อความบทสนทนาภายในกล่อง
         draw_text(screen, self.current_text, (box_rect.x + 25, box_rect.y + 30), 18, c_text)
 
-        # วาดไอคอนสามเหลี่ยมพิกเซลตรงมุมขวาล่างเมื่อพิมพ์จบ
         if self.is_finished_typing:
             btn_rect = pygame.Rect(box_rect.right - 34, box_rect.bottom - 30, 16, 16)
             pygame.draw.rect(screen, c_wood_mid, btn_rect)
