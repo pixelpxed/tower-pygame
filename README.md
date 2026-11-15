@@ -1,14 +1,8 @@
 # Tower Game
-# Demo Video here kub ajarn >> https://youtu.be/peHHsWBr_Bw
-A small tower-climbing game built with Python and pygame. The game
-shows multiple towers on a shared map. Each tower contains floors with one
-<<<<<<< HEAD
-enemy per floor; clear every floor in one tower to unlock the next one.
-=======
-enemy per floor; clear every floor in one tower to unlock the next one. The
-prototype uses drawn shapes and system fonts, so it runs before optional image,
-audio, and font assets are added.
->>>>>>> 12edd653b83b2eb7f1300b2b4d242e3972b34579
+
+A small tower-climbing game built with `Python` and `pygame`. The game shows multiple towers on a shared map. Each tower contains floors with one enemy per floor; clear every floor in one tower to unlock the next one.
+
+[15 Sec Demo / YouTube](https://youtu.be/peHHsWBr_Bw)
 
 ## Run
 
@@ -21,9 +15,9 @@ python main.py
 
 `Menu (START)` -> `Story` -> `CutScene` -> `Tower map / battles` -> `Ending`
 
-* Win every tower -> **EndWinScene** (good ending) -> menu.
-* Lose a battle with lives left -> **DEFEATED** screen (↺ back to the tower, 🏠 menu).
-* Lose all lives (or lose to a boss) -> **EndLostScene** (bad ending) -> menu.
+* Win every tower -> `EndWinScene` (good ending) -> menu.
+* Lose a battle with lives left -> `DEFEATED` screen (back to the tower, menu).
+* Lose all lives (or lose to a boss) -> `EndLostScene` (bad ending) -> menu.
 
 ## Battle rules
 
@@ -49,9 +43,3 @@ sheets in `assets/player` and `assets/enemy`.
 
 The game data lives in `data/`. Add art and audio under `assets/` without
 changing the game systems.
-=======
-Each battle compares your doable damage with the enemy’s power; you must exceed it to win. Victories add enemy power and replace your item. A normal loss costs one life, while a boss loss ends the run. Stick reduces damage to 90% of power and lightsaber increases it to 110%.
-
-The game data lives in `data/`. Add art and audio under `assets/` without
-changing the game systems.
->>>>>>> 12edd653b83b2eb7f1300b2b4d242e3972b34579
