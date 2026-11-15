@@ -120,7 +120,6 @@ class StoryScene:
         self._manage_background_music()
 
     def _load_current_background(self):
-        """โหลดรูปภาพพื้นหลัง พร้อมปรับให้ขยายเต็มหน้าจอ"""
         bg_name = self.script[self.current_line_idx]["bg"]
         bg_path = Path("game/scenes/image") / bg_name
 
@@ -143,7 +142,6 @@ class StoryScene:
         return None
 
     def _manage_background_music(self):
-        """จัดการเพลงพื้นหลัง: ถ้าอยู่หน้า 1.png ให้เล่นวนไปเรื่อยๆ ถ้าพ้นแล้วให้หยุด"""
         current_bg = self.script[self.current_line_idx]["bg"]
         bg_music_path = Path("game/scenes/soundeffect") / "farm.mp3"
 
