@@ -1,5 +1,5 @@
 # Tower Game
-
+# Demo Video here kub ajarn >> https://youtu.be/peHHsWBr_Bw
 A small tower-climbing game built with Python and pygame. The game
 shows multiple towers on a shared map. Each tower contains floors with one
 <<<<<<< HEAD
@@ -16,7 +16,6 @@ audio, and font assets are added.
 python -m pip install -r requirements.txt
 python main.py
 ```
-Demo video >> https://youtu.be/peHHsWBr_Bw
 
 ## Game flow
 
