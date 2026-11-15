@@ -30,6 +30,10 @@ class Player:
         return self.power * multiplier
 
 
+    @property
+    def attack(self) -> int:
+        return self.power
+
     @attack.setter
     def attack(self, value: int) -> None:
         self.power = value

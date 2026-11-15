@@ -15,6 +15,8 @@ FLOOR_HEIGHT = 120
 PLAYER_IMAGE_SIZE = (90, 90)
 ENEMY_IMAGE_SIZE = (90, 90)
 BONK_DELAY_MS = 320
+MOVE_DURATION_MS = 450
+MOVE_ARC_PX = 28
 
 
 class TowerScene:
@@ -43,6 +45,10 @@ class TowerScene:
         self.player_frame_index = 0
         self.player_frame_timer = 0
         self.attacking = False
+        self.moving = False
+        self.move_elapsed = 0
+        self.move_start = None
+        self.move_target = None
         self.player_won = True
         self.bonk_delay = None
         self.player_image = self.player_frames[0]
@@ -104,12 +110,16 @@ class TowerScene:
                     break
         self.menu.handle_event(event)
 
-    def start_attack(self, player_won):
+    def start_attack(self, player_won, start_position=None, target_position=None):
         if self.attacking:
             return
         self.attacking = True
         self.player_won = player_won
-        self.bonk_delay = BONK_DELAY_MS if player_won else None
+        self.move_start = start_position or target_position
+        self.move_target = target_position or self.move_start
+        self.move_elapsed = 0
+        self.moving = self.move_start != self.move_target
+        self.bonk_delay = None if self.moving else BONK_DELAY_MS if player_won else None
         self.player_frame_index = 0
         self.player_frame_timer = 0
         self.player_image = self.player_frames[0]
@@ -118,6 +128,15 @@ class TowerScene:
     def update(self, dt_ms):
         if not self.attacking:
             return
+
+        if self.moving:
+            self.move_elapsed += dt_ms
+            if self.move_elapsed >= MOVE_DURATION_MS:
+                self.move_elapsed = MOVE_DURATION_MS
+                self.moving = False
+                self.bonk_delay = BONK_DELAY_MS if self.player_won else None
+            else:
+                return
 
         if self.bonk_delay is not None:
             self.bonk_delay -= dt_ms
@@ -156,6 +175,25 @@ class TowerScene:
                               pygame.Rect(x, y, TOWER_WIDTH, FLOOR_HEIGHT)))
         return rects
 
+    def _player_anchor(self, position):
+        tower_index, floor_index = position
+        x = self._left() + tower_index * (TOWER_WIDTH + GAP)
+        y = BOTTOM - (floor_index + 1) * FLOOR_HEIGHT
+        return (x + 8, y + FLOOR_HEIGHT // 2)
+
+    def _current_player_anchor(self):
+        if not self.moving or self.move_start is None or self.move_target is None:
+            return self._player_anchor(self.game.player.position)
+
+        start_x, start_y = self._player_anchor(self.move_start)
+        target_x, target_y = self._player_anchor(self.move_target)
+        progress = self.move_elapsed / MOVE_DURATION_MS
+        arc = MOVE_ARC_PX * (1 - abs(2 * progress - 1))
+        return (
+            start_x + (target_x - start_x) * progress + arc,
+            start_y + (target_y - start_y) * progress,
+        )
+
     def draw(self, screen):
         screen.blit(self.bg_image, (0, 0))
         player = self.game.player
@@ -192,6 +230,7 @@ class TowerScene:
         player = self.game.player
         towers = self.game.tower.towers
         left = self._left()
+        player_anchor = self._current_player_anchor()
 
         pygame.draw.line(
             screen,
@@ -266,18 +305,13 @@ class TowerScene:
                     )
 
                 # เรนเดอร์ตัวละครผู้เล่นและไอเทม
-                if current:
-                    screen.blit(
-                        self.player_image,
-                        self.player_image.get_rect(
-                            midleft=(x + 8, y + FLOOR_HEIGHT // 2)
-                        ),
-                    )
-                    player_item = self.player_item_images.get(player.item)
-                    if player_item is not None:
-                        screen.blit(
-                            player_item,
-                            player_item.get_rect(
-                                midleft=(x + 8, y + FLOOR_HEIGHT // 2)
-                            ),
-                        )
+        screen.blit(
+            self.player_image,
+            self.player_image.get_rect(midleft=player_anchor),
+        )
+        player_item = self.player_item_images.get(player.item)
+        if player_item is not None:
+            screen.blit(
+                player_item,
+                player_item.get_rect(midleft=player_anchor),
+            )

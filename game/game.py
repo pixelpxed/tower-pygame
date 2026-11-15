@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pygame
 
 from game.entities.player import Player
@@ -47,6 +49,7 @@ class Game:
 
     def start_tower(self):
         """หลัง CutScene จบ จะพาเข้าสู่หน้าหอคอย/เล่นเกมหลัก"""
+        self.play_fight_music()
         self.scene = TowerScene(self)
 
     def show_menu(self):
@@ -55,7 +58,17 @@ class Game:
     def back_to_tower(self):
         self.monster = None
         self.message = ""
+        self.play_fight_music()
         self.scene = TowerScene(self)
+
+    def play_fight_music(self):
+        music_path = Path(__file__).resolve().parent / "scenes" / "soundeffect" / "fight-theme.mp3"
+        try:
+            pygame.mixer.music.load(str(music_path))
+            pygame.mixer.music.play(-1)
+            pygame.mixer.music.set_volume(0.5)
+        except pygame.error as error:
+            print(f"[audio] Could not play {music_path}: {error}")
 
     # ---------------------------------------------------------------- combat
     def select_enemy(self, tower_index: int, floor_index: int) -> None:
@@ -68,10 +81,15 @@ class Game:
         if isinstance(self.scene, TowerScene) and self.scene.attacking:
             return
 
+        previous_position = self.player.position
         self.player.position = (tower_index, floor_index)
         self.monster = self.tower.monster_for_floor(tower_index, floor_index)
         if isinstance(self.scene, TowerScene):
-            self.scene.start_attack(self.player.doable_damage > self.monster.power)
+            self.scene.start_attack(
+                self.player.doable_damage > self.monster.power,
+                previous_position,
+                self.player.position,
+            )
         else:
             self.player_attack()
 
@@ -100,6 +118,9 @@ class Game:
             else:
                 self.message = "You were defeated. Lost one life."
             self.won = False
+            if monster.kind != "boss" and self.player.alive:
+                self.back_to_tower()
+                return
             # แพ้ทุกครั้งผ่านหน้า DEFEATED เพื่อให้เห็นหัวใจลดก่อน
             # (ถ้าหัวใจหมด หน้านี้จะพาไป EndLostScene เอง)
             self.scene = GameOverScene(self)
@@ -110,6 +131,7 @@ class Game:
             self.scene = EndLostScene(self)
             return
         self.monster = None
+        self.play_fight_music()
         self.scene = TowerScene(self)
 
     # ------------------------------------------------------------------ loop
