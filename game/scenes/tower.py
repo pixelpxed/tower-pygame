@@ -23,6 +23,14 @@ class TowerScene:
         self.bg_image = load_background((WIDTH, HEIGHT))
         self.menu = HomeButton((WIDTH // 2, 24 + 32), game.show_menu)  # top-center
         root = Path(__file__).resolve().parents[2]
+        self.floor_texture = self._load_texture(
+            root / "assets" / "tower-floors.png",
+            (TOWER_WIDTH, FLOOR_HEIGHT),
+        )
+        self.roof_texture = self._load_texture(
+            root / "assets" / "tower-roof.png",
+            (TOWER_WIDTH, 23),
+        )
         self.player_frames, self.player_durations = self._load_animation(
             root / "assets" / "player",
             PLAYER_IMAGE_SIZE,
@@ -79,6 +87,11 @@ class TowerScene:
     def _load_item(path, image_size):
         image = pygame.image.load(path).convert_alpha()
         return pygame.transform.scale(image, image_size)
+
+    @staticmethod
+    def _load_texture(path, image_size):
+        image = pygame.image.load(path).convert_alpha()
+        return pygame.transform.smoothscale(image, image_size)
 
     def handle_event(self, event):
         if not self.attacking and event.type == pygame.MOUSEBUTTONUP and event.button == 1:
@@ -192,9 +205,11 @@ class TowerScene:
             active = tower_index == player.tower
 
             tower_color = COLORS["accent"] if active else COLORS["muted"]
-            pygame.draw.rect(screen, (20, 14, 50), (x, top, TOWER_WIDTH, height))
-            pygame.draw.rect(screen, tower_color, (x, top, TOWER_WIDTH, height), 3)
-            self._draw_tower_top(screen, x, top, tower_color)
+            for floor_index in range(len(floors)):
+                y = BOTTOM - (floor_index + 1) * FLOOR_HEIGHT
+                screen.blit(self.floor_texture, (x, y))
+            pygame.draw.rect(screen, tower_color, (x, top, TOWER_WIDTH, height), 2)
+            screen.blit(self.roof_texture, (x, top - self.roof_texture.get_height()))
 
             for floor_index, floor in enumerate(floors):
                 y = BOTTOM - (floor_index + 1) * FLOOR_HEIGHT
@@ -210,9 +225,6 @@ class TowerScene:
                     pygame.draw.rect(screen, COLORS["accent"],
                                      (x + 3, y + 3, TOWER_WIDTH - 6, FLOOR_HEIGHT - 6), 1,
                                      border_radius=4)
-                if floor_index > 0:
-                    pygame.draw.line(screen, COLORS["muted"], (x + 6, y + FLOOR_HEIGHT),
-                                     (x + TOWER_WIDTH - 6, y + FLOOR_HEIGHT), 1)
                 draw_text(
                     screen,
                     str(floor["monster"]["power"]),
@@ -255,20 +267,3 @@ class TowerScene:
                                 midleft=(x + 8, y + FLOOR_HEIGHT // 2)
                             ),
                         )
-
-    @staticmethod
-    def _draw_tower_top(screen, x, top, color):
-        crenel_width = 16
-        crenel_height = 9
-        for offset in (8, 8 + crenel_width * 2, 8 + crenel_width * 4):
-            pygame.draw.rect(
-                screen,
-                (20, 14, 50),
-                (x + offset, top - crenel_height, crenel_width, crenel_height),
-            )
-            pygame.draw.rect(
-                screen,
-                color,
-                (x + offset, top - crenel_height, crenel_width, crenel_height),
-                3,
-            )
