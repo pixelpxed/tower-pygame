@@ -150,16 +150,6 @@ def draw_monster_power(surf: pygame.Surface, center: tuple, value: int, is_boss:
     surf.blit(num, num.get_rect(center=rect.center))
     return rect
 
-
-def draw_drop_marker(surf: pygame.Surface, center: tuple, radius: int = 6) -> pygame.Rect:
-    """อีตัวนี้มีของ"""
-    k = surf.get_width() / 1280
-    r = max(4, round(radius * k))
-    pygame.draw.circle(surf, BLACK, center, r + max(1, round(2 * k)))
-    pygame.draw.circle(surf, WHITE, center, r)
-    return pygame.Rect(center[0] - r, center[1] - r, r * 2, r * 2)
-
-
 class HomeButton:
     def __init__(self, center: tuple, callback, size: int = 64):
         self.rect = pygame.Rect(0, 0, size, size)

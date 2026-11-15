@@ -5,15 +5,16 @@ import pygame
 
 from game.scenes.battle import load_background
 from game.settings import COLORS, HEIGHT, WIDTH
-from ui.battle import HomeButton, draw_drop_marker, draw_hearts, draw_monster_power, draw_power
+from ui.battle import HomeButton, draw_hearts, draw_monster_power, draw_power
 from ui.text import draw_text
 
 TOWER_WIDTH = 150
-GAP = 30
-BOTTOM = 620
+GAP = 22
+BOTTOM = 640
 FLOOR_HEIGHT = 100
 PLAYER_IMAGE_SIZE = (60, 60)
 ENEMY_IMAGE_SIZE = (60, 60)
+BONK_DELAY_MS = 320
 
 
 class TowerScene:
@@ -22,6 +23,17 @@ class TowerScene:
         self.bg_image = load_background((WIDTH, HEIGHT))
         self.menu = HomeButton((WIDTH // 2, 24 + 32), game.show_menu)  # top-center
         root = Path(__file__).resolve().parents[2]
+
+        # โหลดเท็กซ์เจอร์หอคอยและหลังคา
+        self.floor_texture = self._load_texture(
+            root / "assets" / "tower-floors.png",
+            (TOWER_WIDTH, FLOOR_HEIGHT),
+        )
+        self.roof_texture = self._load_texture(
+            root / "assets" / "tower-roof.png",
+            (TOWER_WIDTH, 23),
+        )
+
         self.player_frames, self.player_durations = self._load_animation(
             root / "assets" / "player",
             PLAYER_IMAGE_SIZE,
@@ -34,9 +46,27 @@ class TowerScene:
         self.player_frame_timer = 0
         self.attacking = False
         self.player_won = True
+        self.bonk_delay = None
         self.player_image = self.player_frames[0]
         self.enemy_image = self.enemy_frames[0]
         self.enemy_attack_image = self.enemy_image
+
+        # โหลดไอเทมของเอเลี่ยนและผู้เล่น
+        items_dir = root / "assets" / "items"
+        self.enemy_item_images = {
+            "stick": self._load_item(items_dir / "stick.png", ENEMY_IMAGE_SIZE),
+            "lightsaber": self._load_item(
+                items_dir / "lightsaber-enemy.png",
+                ENEMY_IMAGE_SIZE,
+            ),
+        }
+        self.player_item_images = {
+            "stick": self._load_item(items_dir / "stick.png", PLAYER_IMAGE_SIZE),
+            "lightsaber": self._load_item(
+                items_dir / "lightsaber-player.png",
+                PLAYER_IMAGE_SIZE,
+            ),
+        }
 
     @staticmethod
     def _load_animation(asset_dir, image_size):
@@ -58,6 +88,16 @@ class TowerScene:
         durations = [frame["duration_ms"] for frame in animation_data["frames"]]
         return frames, durations
 
+    @staticmethod
+    def _load_item(path, image_size):
+        image = pygame.image.load(path).convert_alpha()
+        return pygame.transform.scale(image, image_size)
+
+    @staticmethod
+    def _load_texture(path, image_size):
+        image = pygame.image.load(path).convert_alpha()
+        return pygame.transform.smoothscale(image, image_size)
+
     def handle_event(self, event):
         if not self.attacking and event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             for tower_index, floor_index, rect in self._floor_rects():
@@ -71,6 +111,7 @@ class TowerScene:
             return
         self.attacking = True
         self.player_won = player_won
+        self.bonk_delay = BONK_DELAY_MS if player_won else None
         self.player_frame_index = 0
         self.player_frame_timer = 0
         self.player_image = self.player_frames[0]
@@ -116,10 +157,21 @@ class TowerScene:
         player = self.game.player
 
         self._draw_hud(screen, player)
-        if self.game.message:
-            draw_text(screen, self.game.message, (WIDTH // 2, 230), 16, COLORS["text"], center=True)
-
         self._draw_towers(screen)
+
+        if self.game.message:
+            status_rect = pygame.Rect(120, HEIGHT - 72, WIDTH - 240, 48)
+            navy = (20, 35, 80)
+            pygame.draw.rect(screen, (255, 255, 255), status_rect, border_radius=8)
+            pygame.draw.rect(screen, navy, status_rect, 3, border_radius=8)
+            draw_text(
+                screen,
+                self.game.message,
+                status_rect.center,
+                16,
+                navy,
+                center=True,
+            )
         self.menu.draw(screen)
 
     @staticmethod
@@ -137,6 +189,14 @@ class TowerScene:
         towers = self.game.tower.towers
         left = self._left()
 
+        pygame.draw.line(
+            screen,
+            COLORS["muted"],
+            (left - 70, BOTTOM + 2),
+            (left + len(towers) * (TOWER_WIDTH + GAP) - GAP + 70, BOTTOM + 2),
+            3,
+        )
+
         for tower_index, tower in enumerate(towers):
             x = left + tower_index * (TOWER_WIDTH + GAP)
             floors = tower["floors"]
@@ -144,14 +204,15 @@ class TowerScene:
             top = BOTTOM - height
             active = tower_index == player.tower
 
-            draw_text(screen, tower["name"], (x + TOWER_WIDTH // 2, BOTTOM + 28), 20,
-                      COLORS["accent"] if active else COLORS["muted"], center=True)
+            tower_color = COLORS["accent"] if active else COLORS["muted"]
 
-            panel = pygame.Surface((TOWER_WIDTH, height), pygame.SRCALPHA)
-            pygame.draw.rect(panel, (20, 14, 50, 205), panel.get_rect(), border_radius=8)
-            screen.blit(panel, (x, top))
-            pygame.draw.rect(screen, COLORS["accent"] if active else COLORS["muted"],
-                             (x, top, TOWER_WIDTH, height), 2, border_radius=8)
+            # วาดพื้นผิวและหลังคาหอคอย
+            for floor_index in range(len(floors)):
+                y = BOTTOM - (floor_index + 1) * FLOOR_HEIGHT
+                screen.blit(self.floor_texture, (x, y))
+
+            pygame.draw.rect(screen, tower_color, (x, top, TOWER_WIDTH, height), 2)
+            screen.blit(self.roof_texture, (x, top - self.roof_texture.get_height()))
 
             for floor_index, floor in enumerate(floors):
                 y = BOTTOM - (floor_index + 1) * FLOOR_HEIGHT
@@ -159,6 +220,7 @@ class TowerScene:
                 conquered = enemy_id in self.game.defeated
                 selectable = active and not conquered
                 current = (tower_index, floor_index) == player.position
+
                 if conquered:
                     tint = pygame.Surface((TOWER_WIDTH - 4, FLOOR_HEIGHT - 2), pygame.SRCALPHA)
                     tint.fill((60, 200, 110, 45))
@@ -167,30 +229,39 @@ class TowerScene:
                     pygame.draw.rect(screen, COLORS["accent"],
                                      (x + 3, y + 3, TOWER_WIDTH - 6, FLOOR_HEIGHT - 6), 1,
                                      border_radius=4)
-                if floor_index > 0:
-                    pygame.draw.line(screen, COLORS["muted"], (x + 6, y + FLOOR_HEIGHT),
-                                     (x + TOWER_WIDTH - 6, y + FLOOR_HEIGHT), 1)
 
+                # เรนเดอร์ตัวละครศัตรู
                 enemy_image = (
                     self.enemy_attack_image
                     if current and self.attacking and not self.player_won
                     else self.enemy_image
                 )
-                screen.blit(
-                    enemy_image,
-                    enemy_image.get_rect(
-                        midright=(x + TOWER_WIDTH - 8, y + FLOOR_HEIGHT // 2)
-                    ),
+                enemy_rect = enemy_image.get_rect(
+                    midright=(x + TOWER_WIDTH - 8, y + FLOOR_HEIGHT // 2)
                 )
-                if not conquered:
-                    enemy_rect = enemy_image.get_rect(
-                        midright=(x + TOWER_WIDTH - 8, y + FLOOR_HEIGHT // 2)
+                screen.blit(enemy_image, enemy_rect)
+
+                # เรนเดอร์ไอเทมศัตรู (ถ้ามี)
+                enemy_item = self.enemy_item_images.get(floor["monster"]["item"])
+                if enemy_item is not None:
+                    screen.blit(
+                        enemy_item,
+                        enemy_item.get_rect(
+                            midright=(x + TOWER_WIDTH - 8, y + FLOOR_HEIGHT // 2)
+                        ),
                     )
+
+                # เรนเดอร์ค่าพลังมอนสเตอร์ด้วยฟังก์ชันใหม่ที่ไม่ซ้อนทับ
+                if not conquered:
                     monster = self.game.tower.monster_for_floor(tower_index, floor_index)
-                    draw_monster_power(screen, (enemy_rect.centerx, y + 14),
-                                       monster.power, is_boss=monster.kind == "boss")
-                    if monster.item:
-                        draw_drop_marker(screen, (enemy_rect.right - 14, enemy_rect.bottom - 14))
+                    draw_monster_power(
+                        screen,
+                        (x + 35, y + FLOOR_HEIGHT // 2),
+                        monster.power,
+                        is_boss=monster.kind == "boss"
+                    )
+
+                # เรนเดอร์ตัวละครผู้เล่นและไอเทม
                 if current:
                     screen.blit(
                         self.player_image,
@@ -198,3 +269,11 @@ class TowerScene:
                             midleft=(x + 8, y + FLOOR_HEIGHT // 2)
                         ),
                     )
+                    player_item = self.player_item_images.get(player.item)
+                    if player_item is not None:
+                        screen.blit(
+                            player_item,
+                            player_item.get_rect(
+                                midleft=(x + 8, y + FLOOR_HEIGHT // 2)
+                            ),
+                        )
