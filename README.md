@@ -16,9 +16,7 @@ audio, and font assets are added.
 python -m pip install -r requirements.txt
 python main.py
 ```
-
-<<<<<<< HEAD
-Run it from the project root (asset paths are relative to it).
+Demo video >> https://youtu.be/peHHsWBr_Bw
 
 ## Game flow
 
