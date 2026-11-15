@@ -1,0 +1,15 @@
+[
+    {"name": "Zexx", "kind": "enemy", "power": 3, "item": null},
+    {"name": "Xylo", "kind": "enemy", "power": 4, "item": "stick"},
+    {"name": "Cyra", "kind": "enemy", "power": 6, "item": null},
+    {"name": "Syx", "kind": "enemy", "power": 8, "item": "lightsaber"},
+    {"name": "Zylos", "kind": "enemy", "power": 11, "item": null},
+    {"name": "Xexis", "kind": "enemy", "power": 15, "item": null},
+    {"name": "Cyrus", "kind": "enemy", "power": 13, "item": null},
+    {"name": "Zazz", "kind": "enemy", "power": 16, "item": null},
+    {"name": "Cyrax", "kind": "enemy", "power": 20, "item": null},
+    {"name": "Xylar", "kind": "enemy", "power": 18, "item": null},
+    {"name": "Sycora", "kind": "enemy", "power": 22, "item": null},
+    {"name": "Zexis", "kind": "enemy", "power": 26, "item": null},
+    {"name": "Xylos-Prime", "kind": "boss", "power": 32, "item": null}
+  ]

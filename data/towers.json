@@ -1,0 +1,45 @@
+{
+  "towers": [
+    {
+      "name": "Sunspire",
+      "floors": [
+        {"monster": {"name": "Zexx", "kind": "enemy", "power": 4, "item": "stick"}},
+        {"monster": {"name": "Zazz", "kind": "enemy", "power": 6, "item": null}}
+      ]
+    },
+    {
+      "name": "Moonkeep",
+      "floors": [
+        {"monster": {"name": "Xylo", "kind": "enemy", "power": 12, "item": "lightsaber"}},
+        {"monster": {"name": "Cyra", "kind": "enemy", "power": 35, "item": "stick"}},
+        {"monster": {"name": "Syx", "kind": "enemy", "power": 11, "item": null}}
+      ]
+    },
+    {
+      "name": "Stormhold",
+      "floors": [
+        {"monster": {"name": "Cyrus", "kind": "enemy", "power": 169, "item": "stick"}},
+        {"monster": {"name": "Zylos", "kind": "enemy", "power": 55, "item": null}},
+        {"monster": {"name": "Xexis", "kind": "enemy", "power": 67, "item": "lightsaber"}}
+      ]
+    },
+    {
+      "name": "Nebulox",
+      "floors": [
+        {"monster": {"name": "Xylar", "kind": "enemy", "power": 666, "item": "stick"}},
+        {"monster": {"name": "Sycora", "kind": "enemy", "power": 999, "item": "lightsaber"}},
+        {"monster": {"name": "Zexis-V", "kind": "enemy", "power": 290, "item": null}},
+        {"monster": {"name": "Cyrax", "kind": "enemy", "power": 310, "item": "stick"}}
+      ]
+    },
+    {
+      "name": "Zeltoria",
+      "floors": [
+        {"monster": {"name": "Xylo-X", "kind": "enemy", "power": 2222, "item": "stick"}},
+        {"monster": {"name": "Sycora-Prime", "kind": "enemy", "power": 3333 , "item": "lightsaber"}},
+        {"monster": {"name": "Zexis-Omega", "kind": "enemy", "power": 2222, "item": "lightsaber"}},
+        {"monster": {"name": "Xylos-Ultimate", "kind": "boss", "power": 9999, "item": null}}
+      ]
+    }
+  ]
+}
