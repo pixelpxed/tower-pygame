@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import pygame
 
 from game.scenes.battle import load_background
@@ -5,10 +8,12 @@ from game.settings import COLORS, HEIGHT, WIDTH
 from ui.battle_kub import HomeButton, draw_hearts, draw_power
 from ui.text import draw_text
 
-TOWER_WIDTH = 190
-GAP = 25
-BOTTOM = 440
-FLOOR_HEIGHT = 48
+TOWER_WIDTH = 150
+GAP = 30
+BOTTOM = 620
+FLOOR_HEIGHT = 100
+PLAYER_IMAGE_SIZE = (60, 60)
+ENEMY_IMAGE_SIZE = (60, 60)
 
 
 class TowerScene:
@@ -16,14 +21,81 @@ class TowerScene:
         self.game = game
         self.bg_image = load_background((WIDTH, HEIGHT))
         self.menu = HomeButton((WIDTH // 2, 24 + 32), game.show_menu)  # top-center
+        root = Path(__file__).resolve().parents[2]
+        self.player_frames, self.player_durations = self._load_animation(
+            root / "assets" / "player",
+            PLAYER_IMAGE_SIZE,
+        )
+        self.enemy_frames, self.enemy_durations = self._load_animation(
+            root / "assets" / "enemy",
+            ENEMY_IMAGE_SIZE,
+        )
+        self.player_frame_index = 0
+        self.player_frame_timer = 0
+        self.attacking = False
+        self.player_won = True
+        self.player_image = self.player_frames[0]
+        self.enemy_image = self.enemy_frames[0]
+        self.enemy_attack_image = self.enemy_image
+
+    @staticmethod
+    def _load_animation(asset_dir, image_size):
+        with (asset_dir / "attack.json").open(encoding="utf-8") as file:
+            animation_data = json.load(file)
+
+        sheet = pygame.image.load(asset_dir / animation_data["sheet"]).convert_alpha()
+        frame_width = animation_data["frame_width"]
+        frame_height = animation_data["frame_height"]
+        frames = [
+            pygame.transform.scale(
+                sheet.subsurface(
+                    (frame["index"] * frame_width, 0, frame_width, frame_height)
+                ).copy(),
+                image_size,
+            )
+            for frame in animation_data["frames"]
+        ]
+        durations = [frame["duration_ms"] for frame in animation_data["frames"]]
+        return frames, durations
 
     def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+        if not self.attacking and event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             for tower_index, floor_index, rect in self._floor_rects():
                 if rect.collidepoint(event.pos):
                     self.game.select_enemy(tower_index, floor_index)
                     break
         self.menu.handle_event(event)
+
+    def start_attack(self, player_won):
+        if self.attacking:
+            return
+        self.attacking = True
+        self.player_won = player_won
+        self.player_frame_index = 0
+        self.player_frame_timer = 0
+        self.player_image = self.player_frames[0]
+        self.enemy_attack_image = self.enemy_frames[0]
+
+    def update(self, dt_ms):
+        if not self.attacking:
+            return
+
+        frames = self.player_frames if self.player_won else self.enemy_frames
+        durations = self.player_durations if self.player_won else self.enemy_durations
+        self.player_frame_timer += dt_ms
+        while self.player_frame_timer >= durations[self.player_frame_index]:
+            self.player_frame_timer -= durations[self.player_frame_index]
+            if self.player_frame_index + 1 == len(frames):
+                self.attacking = False
+                self.player_image = self.player_frames[0]
+                self.enemy_attack_image = self.enemy_frames[0]
+                self.game.player_attack()
+                return
+            self.player_frame_index += 1
+            if self.player_won:
+                self.player_image = frames[self.player_frame_index]
+            else:
+                self.enemy_attack_image = frames[self.player_frame_index]
 
     def _left(self):
         count = len(self.game.tower.towers)
@@ -87,9 +159,6 @@ class TowerScene:
                 conquered = enemy_id in self.game.defeated
                 selectable = active and not conquered
                 current = (tower_index, floor_index) == player.position
-                color = (COLORS["success"] if conquered
-                         else COLORS["accent"] if selectable else COLORS["muted"])
-
                 if conquered:
                     tint = pygame.Surface((TOWER_WIDTH - 4, FLOOR_HEIGHT - 2), pygame.SRCALPHA)
                     tint.fill((60, 200, 110, 45))
@@ -102,8 +171,21 @@ class TowerScene:
                     pygame.draw.line(screen, COLORS["muted"], (x + 6, y + FLOOR_HEIGHT),
                                      (x + TOWER_WIDTH - 6, y + FLOOR_HEIGHT), 1)
 
-                label = f"{floor_index + 1}. {floor['monster']['name']}"
-                draw_text(screen, label, (x + 10, y + FLOOR_HEIGHT // 2 - 8), 16, color)
+                enemy_image = (
+                    self.enemy_attack_image
+                    if current and self.attacking and not self.player_won
+                    else self.enemy_image
+                )
+                screen.blit(
+                    enemy_image,
+                    enemy_image.get_rect(
+                        midright=(x + TOWER_WIDTH - 8, y + FLOOR_HEIGHT // 2)
+                    ),
+                )
                 if current:
-                    draw_text(screen, "YOU", (x + TOWER_WIDTH - 32, y + FLOOR_HEIGHT // 2 - 8), 13,
-                              COLORS["text"], center=True)
+                    screen.blit(
+                        self.player_image,
+                        self.player_image.get_rect(
+                            midleft=(x + 8, y + FLOOR_HEIGHT // 2)
+                        ),
+                    )

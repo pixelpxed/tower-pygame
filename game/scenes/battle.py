@@ -36,14 +36,14 @@ class BattleScene:
                     max_hearts=3)
         draw_power(screen, (WIDTH - margin, margin), player.power)
 
-        draw_text(screen, f"{tower_name} - Floor {(player.position[1] + 1)}: {monster.name}",
+        draw_text(screen, f"{tower_name} - Floor {(player.position[1] + 1)}",
                   (WIDTH // 2, 125), 32, COLORS["accent"], center=True)
         draw_text(screen, player.name, (220, 170), 26, COLORS["text"], center=True)
-        draw_text(screen, monster.name, (740, 170), 26, COLORS["text"], center=True)
+        draw_text(screen, "Opponent", (740, 170), 26, COLORS["text"], center=True)
 
         draw_text(screen, f"Item: {player.item or 'None'}", (220, 220), 22, COLORS["text"], center=True)
         draw_text(screen, f"Doable damage: {player.doable_damage:g}", (220, 255), 22, COLORS["text"], center=True)
-        draw_text(screen, f"{monster.kind.title()} power: {monster.power}", (740, 220), 22, COLORS["text"], center=True)
+        draw_text(screen, f"Power: {monster.power}", (740, 220), 22, COLORS["text"], center=True)
         draw_text(screen, f"Item reward: {monster.item or 'None'}", (740, 255), 22, COLORS["text"], center=True)
 
         draw_text(screen, self.game.message, (WIDTH // 2, 390), 20, COLORS["muted"], center=True)

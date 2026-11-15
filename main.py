@@ -1,5 +1,3 @@
-"""Entry point for Tower Game."""
-
 from game.game import Game
 
 

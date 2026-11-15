@@ -6,6 +6,22 @@ from ui.battle_kub import HomeButton
 from game.scenes.cut_scene import CutScene
 
 BLACK = (15, 15, 20)
+
+
+# def _load_bg(*names):
+#     for name in names:
+#         for path in (HERE / name,
+#                      HERE.parents[1] / "assets" / "images" / name,
+#                      HERE.parents[1] / name,
+#                      Path("game/scenes") / name):
+#             if path.exists():
+#                 return pygame.transform.scale(pygame.image.load(str(path)).convert(), (WIDTH, HEIGHT))
+#     print(f"[game_over] {names[0]} not found. Using a plain background.")
+#     surf = pygame.Surface((WIDTH, HEIGHT))
+#     surf.fill((14, 18, 40))
+#     return surf
+
+
 class RestartButton:
     def __init__(self, center: tuple, callback, size: int = 96):
         self.rect = pygame.Rect(0, 0, size, size)

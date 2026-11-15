@@ -1,7 +1,4 @@
-try:
-    from .classes import Enemy, Floor, Level, Player, Tower
-except ImportError:
-    from classes import Enemy, Floor, Level, Player, Tower
+from classes import Enemy, Floor, Level, Player, Tower
 
 
 def create_level():
@@ -9,17 +6,45 @@ def create_level():
         "First Level",
         1,
         [
-            Tower([Floor([Enemy("enemy", 3, None)])]),
-            Tower(
-                [Floor([Enemy("enemy", 3, "stick")]), Floor([Enemy("enemy", 3, None)])]
-            ),
-            Tower(
-                [
-                    Floor([Enemy("enemy", 3, "lightsaber")]),
-                    Floor([Enemy("enemy", 10, None)]),
-                    Floor([Enemy("boss", 16, None)]),
-                ]
-            ),
+            Tower([
+                Floor([Enemy("enemy", 8, None)]),
+                Floor([Enemy("enemy", 4, None)]),
+                Floor([Enemy("enemy", 6, None)]),
+                Floor([Enemy("enemy", 15, None)]),
+                Floor([Enemy("enemy", 84, None)]),
+                Floor([Enemy("enemy", 42, None)]),
+                Floor([Enemy("enemy", 19, "stick")]),
+            ]),
+            Tower([
+                Floor([Enemy("enemy", 15, None), Enemy("enemy", 6, None)]),
+                Floor([Enemy("enemy", 14, "lightsaber")]),
+                Floor([Enemy("enemy", 42, None)]),
+                Floor([Enemy("enemy", 23, None)]),
+                Floor([Enemy("enemy", 14, "stick")]),
+                Floor([Enemy("enemy", 47, None)]),
+                Floor([Enemy("enemy", 99, None)]),
+            ]),
+            Tower([
+                Floor([Enemy("enemy", 85, "lightsaber"), Enemy("enemy", 25, None)]),
+                Floor([Enemy("enemy", 34, None), Enemy("enemy", 12, None)]),
+                Floor([Enemy("enemy", 99, None)]),
+                Floor([Enemy("enemy", 215, None)]),
+                Floor([Enemy("enemy", 69, None)]),
+                Floor([Enemy("enemy", 452, None)]),
+                Floor([Enemy("enemy", 46, None)]),
+                Floor([Enemy("enemy", 420, None)]),
+            ]),
+            Tower([
+                Floor([Enemy("enemy", 334, None)]),
+                Floor([Enemy("enemy", 452, None)]),
+                Floor([Enemy("enemy", 215, None)]),
+                Floor([Enemy("enemy", 69, None)]),
+                Floor([Enemy("enemy", 85, None)]),
+                Floor([Enemy("enemy", 46, None)]),
+                Floor([Enemy("enemy", 426, None)]),
+                Floor([Enemy("enemy", 840, None)]),
+                Floor([Enemy("boss", 4680, None)]),
+            ]),
         ],
         "default",
     )

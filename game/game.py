@@ -5,7 +5,6 @@ from game.settings import DATA_DIR, FPS, HEIGHT, TITLE, WIDTH
 from game.systems.combat import Combat
 from game.systems.progression import Progression
 from game.systems.tower import Tower
-from game.scenes.battle import BattleScene
 from game.scenes.game_over import GameOverScene
 from game.scenes.menu import MenuScene
 from game.scenes.tower import TowerScene
@@ -43,22 +42,26 @@ class Game:
             return
         if not 0 <= floor_index < len(self.tower.floors_for_tower(tower_index)):
             return
+        if isinstance(self.scene, TowerScene) and self.scene.attacking:
+            return
 
         self.player.position = (tower_index, floor_index)
         self.monster = self.tower.monster_for_floor(tower_index, floor_index)
-        self.message = f"A {self.monster.kind} appears: {self.monster.name}!"
-        self.scene = BattleScene(self)
+        if isinstance(self.scene, TowerScene):
+            self.scene.start_attack(self.player.doable_damage > self.monster.power)
+        else:
+            self.player_attack()
 
     def player_attack(self) -> None:
         monster = self.monster
-        if monster is None or not self.player.alive or not isinstance(self.scene, BattleScene):
+        if monster is None or not self.player.alive:
             return
 
         if Combat.resolve(self.player, monster):
             previous_item = self.player.item or "None"
             Progression.reward_for_victory(self.player, monster)
             self.defeated.add(self.player.position)
-            self.message = (f"{monster.name} defeated! Power +{monster.power}. "
+            self.message = (f"Defeated! Power +{monster.power}. "
                             f"Item: {previous_item} -> {self.player.item or 'None'}.")
             if self.tower.tower_complete(self.player.tower, self.defeated):
                 self.player.tower += 1
@@ -69,9 +72,9 @@ class Game:
                 self.scene = TowerScene(self)
         else:
             if monster.kind == "boss":
-                self.message = f"{monster.name} defeated you! Boss defeat: all lives lost."
+                self.message = "You were defeated. Boss defeat: all lives lost."
             else:
-                self.message = f"{monster.name} defeated you! Lost one life."
+                self.message = "You were defeated. Lost one life."
             if self.player.alive:
                 self.scene = TowerScene(self)
             else:
@@ -83,12 +86,14 @@ class Game:
 
     def run(self):
         while self.running:
+            dt_ms = self.clock.tick(FPS)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.quit()
                 else:
                     self.scene.handle_event(event)
+            if isinstance(self.scene, TowerScene):
+                self.scene.update(dt_ms)
             self.scene.draw(self.screen)
             pygame.display.flip()
-            self.clock.tick(FPS)
         pygame.quit()
