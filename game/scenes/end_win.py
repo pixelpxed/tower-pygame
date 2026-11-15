@@ -7,7 +7,10 @@ from ui.text import draw_text
 class EndWinScene:
     def __init__(self, game, on_done=None, script=None):
         self.game = game
+        # กำหนด on_done สำรองเมื่อจบฉากนี้ (เช่น กลับไปหน้าเมนูหลัก)
         self.on_done = on_done or getattr(game, "show_menu", game.new_run)
+
+        # Script สำหรับเหตุการณ์ตอนชนะ
         self.script = script or [
             {
                 "bg": "black.jpg",
@@ -84,6 +87,7 @@ class EndWinScene:
         ]
 
         self.current_line_idx = 0
+
         self.current_bg = None
         self._load_current_background()
 
@@ -94,8 +98,11 @@ class EndWinScene:
         self.text_speed = 35
         self.is_finished_typing = False
         self.has_played_sound = False
+        self.blip_sound = self._load_sound("text_blip.wav")
+
 
     def _load_current_background(self):
+        """โหลดรูปภาพพื้นหลัง พร้อมปรับขนาดให้เต็มจอ"""
         bg_name = self.script[self.current_line_idx]["bg"]
         bg_path = Path("game/scenes/image") / bg_name
 
@@ -105,7 +112,7 @@ class EndWinScene:
         else:
             print(f"[EndWinScene] Warning: Background image not found at {bg_path}")
             surf = pygame.Surface((WIDTH, HEIGHT))
-            surf.fill((10, 20, 30))
+            surf.fill((10, 20, 30))  # สีพื้นหลังโทนสว่าง/อวกาศสำรองกรณีหาภาพไม่พบ
             self.current_bg = surf
 
     def _load_sound(self, name):
@@ -116,6 +123,15 @@ class EndWinScene:
             except:
                 pass
         return None
+
+    def _manage_background_music(self):
+        bg_music_path = Path("game/scenes/soundeffect") / "win_theme.mp3"
+        if bg_music_path.exists() and not pygame.mixer.music.get_busy():
+            try:
+                pygame.mixer.music.load(str(bg_music_path))
+                pygame.mixer.music.play(-1)
+            except Exception as e:
+                print(f"[EndWinScene] Cannot play BGM: {e}")
 
     def _play_current_sound(self):
         sound_name = self.script[self.current_line_idx].get("sound")
@@ -150,14 +166,16 @@ class EndWinScene:
                 self.current_text = ""
                 self.char_index = 0
                 self.is_finished_typing = False
-                self.has_played_sound = False
+                self.has_played_sound = False  # รีเซ็ตสถานะเสียงสำหรับบรรทัดใหม่
 
                 self._load_current_background()
+                self._manage_background_music()
             else:
                 pygame.mixer.music.stop()
                 self.on_done()
 
     def update(self, dt):
+        """เอฟเฟกต์ตัวอักษรวิ่งทีละตัว และซิงค์เสียงพูดให้มาพร้อมข้อความตัวแรก"""
         if not self.is_finished_typing:
             self.text_timer += dt * 1000
             if self.text_timer >= self.text_speed:
@@ -165,10 +183,6 @@ class EndWinScene:
                 if self.char_index < len(self.target_text):
                     self.current_text += self.target_text[self.char_index]
                     self.char_index += 1
-
-                    if self.char_index == 1 and not self.has_played_sound:
-                        self._play_current_sound()
-                        self.has_played_sound = True
 
                 else:
                     self.is_finished_typing = True
@@ -212,7 +226,7 @@ class EndWinScene:
             pygame.draw.rect(screen, c_outline, (cx, cy, 6, 6))
             pygame.draw.rect(screen, c_wood_light, (cx + 1, cy + 1, 3, 3))
 
-        # ป้ายชื่อ (Speaker)
+        # ป้ายชื่อ
         current_speaker = self.script[self.current_line_idx]["speaker"]
         tag_width = max(110, len(current_speaker) * 12 + 24)
         tag_height = 32
@@ -230,6 +244,7 @@ class EndWinScene:
 
         draw_text(screen, current_speaker, (text_x, text_y), font_size, c_text)
 
+        # แสดงข้อความ
         draw_text(screen, self.current_text, (box_rect.x + 25, box_rect.y + 30), 18, c_text)
 
         if self.is_finished_typing:

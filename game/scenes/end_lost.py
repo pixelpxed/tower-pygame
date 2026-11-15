@@ -74,7 +74,7 @@ class EndLostScene:
                 "speaker": ". . .",
                 "text": "You are them now...",
                 "sound": None
-            },
+            }
         ]
 
         self.current_line_idx = 0
@@ -88,6 +88,9 @@ class EndLostScene:
         self.text_speed = 35
         self.is_finished_typing = False
         self.has_played_sound = False
+
+        self.blip_sound = self._load_sound("text_blip.wav")
+        self._manage_background_music()
 
     def _load_current_background(self):
         bg_name = self.script[self.current_line_idx]["bg"]
@@ -110,6 +113,16 @@ class EndLostScene:
             except:
                 pass
         return None
+
+    def _manage_background_music(self):
+        """จัดการเพลงพื้นหลังประจำฉากแพ้"""
+        bg_music_path = Path("game/scenes/soundeffect") / "lost_theme.mp3"
+        if bg_music_path.exists() and not pygame.mixer.music.get_busy():
+            try:
+                pygame.mixer.music.load(str(bg_music_path))
+                pygame.mixer.music.play(-1)
+            except Exception as e:
+                print(f"[EndLostScene] Cannot play BGM: {e}")
 
     def _play_current_sound(self):
         sound_name = self.script[self.current_line_idx].get("sound")
@@ -134,7 +147,6 @@ class EndLostScene:
             self.char_index = len(self.target_text)
             self.is_finished_typing = True
 
-            # ถ้ากดคลิกข้ามตอนกำลังพิมพ์ แล้วเสียงยังไม่เคยเล่น ให้เล่นเสียงดักไว้เลย
             if not self.has_played_sound:
                 self._play_current_sound()
                 self.has_played_sound = True
@@ -148,11 +160,13 @@ class EndLostScene:
                 self.has_played_sound = False
 
                 self._load_current_background()
+                self._manage_background_music()
             else:
                 pygame.mixer.music.stop()
                 self.on_done()
 
     def update(self, dt):
+        """เอฟเฟกต์ตัวอักษรวิ่งทีละตัว และซิงค์เสียงพูดให้มาพร้อมข้อความตัวแรก"""
         if not self.is_finished_typing:
             self.text_timer += dt * 1000
             if self.text_timer >= self.text_speed:
@@ -160,10 +174,13 @@ class EndLostScene:
                 if self.char_index < len(self.target_text):
                     self.current_text += self.target_text[self.char_index]
                     self.char_index += 1
+
                     if self.char_index == 1 and not self.has_played_sound:
                         self._play_current_sound()
                         self.has_played_sound = True
 
+                    if self.blip_sound and self.char_index % 2 == 0:
+                        self.blip_sound.play()
                 else:
                     self.is_finished_typing = True
 
@@ -206,7 +223,7 @@ class EndLostScene:
             pygame.draw.rect(screen, c_outline, (cx, cy, 6, 6))
             pygame.draw.rect(screen, c_wood_light, (cx + 1, cy + 1, 3, 3))
 
-        # ป้ายชื่อ (Speaker)
+        # ป้ายชื่อ
         current_speaker = self.script[self.current_line_idx]["speaker"]
         tag_width = max(110, len(current_speaker) * 12 + 24)
         tag_height = 32
@@ -224,6 +241,7 @@ class EndLostScene:
 
         draw_text(screen, current_speaker, (text_x, text_y), font_size, c_text)
 
+        # แสดงข้อความ
         draw_text(screen, self.current_text, (box_rect.x + 25, box_rect.y + 30), 18, c_text)
 
         if self.is_finished_typing:

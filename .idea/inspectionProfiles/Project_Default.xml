@@ -103,8 +103,11 @@
           <option value="webencodings" />
           <option value="websocket-client" />
           <option value="widgetsnbextension" />
+<<<<<<< HEAD
           <option value="pygame" />
           <option value="pillow" />
+=======
+>>>>>>> 12edd653b83b2eb7f1300b2b4d242e3972b34579
         </list>
       </option>
     </inspection_tool>

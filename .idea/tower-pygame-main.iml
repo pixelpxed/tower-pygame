@@ -2,11 +2,17 @@
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
+<<<<<<< HEAD
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/legacy/B_hp_combat" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
     </content>
     <orderEntry type="jdk" jdkName="~\AppData\Local\Microsoft\WindowsApps\python3.13.exe" jdkType="Python SDK" />
+=======
+      <excludeFolder url="file://$MODULE_DIR$/.venv" />
+    </content>
+    <orderEntry type="jdk" jdkName="~\Downloads\tower-pygame-main\tower-pygame-main\.venv" jdkType="Python SDK" />
+>>>>>>> 12edd653b83b2eb7f1300b2b4d242e3972b34579
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PackageRequirementsSettings" />

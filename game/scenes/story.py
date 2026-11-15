@@ -1,6 +1,6 @@
 from pathlib import Path
 import pygame
-from game.settings import COLORS, HEIGHT, WIDTH
+from game.settings import HEIGHT, WIDTH
 from ui.text import draw_text
 
 
@@ -9,118 +9,126 @@ class StoryScene:
         self.game = game
         self.on_done = on_done or game.new_run
         self.script = [
-    {
-        "bg": "1.png",
-        "speaker": ". . .",
-        "text": "As evening fell over the quiet farm...",
-        "sound": None
-    },
-    {
-        "bg": "1.png",
-        "speaker": ". . .",
-        "text": "A cool breeze blew down from the mountains across the open fields.",
-        "sound": None
-    },
-    {
-        "bg": "1.png",
-        "speaker": ". . .",
-        "text": "All the farm animals were resting peacefully in their spots.",
-        "sound": None
-    },
-    {
-        "bg": "1.png",
-        "speaker": ". . .",
-        "text": "Including a certain little orange cat...",
-        "sound": None
-    },
-    {
-        "bg": "1.png",
-        "speaker": ". . .",
-        "text": "Everything seemed completely normal.",
-        "sound": None
-    },
-    {
-        "bg": "1.png",
-        "speaker": ". . .",
-        "text": "Except for one thing...",
-        "sound": None
-    },
-    {
-         "bg": "1.png",
-        "speaker": ". . .",
-        "text": "! ? ! ? !",
-        "sound": "!.mp3"
-    },
-    {
-        "bg": "2.png",
-        "speaker": "(You)",
-        "text": "Zzz z ... .z",
-        "sound": "snore.mp3"
-    },
-    {
-        "bg": "2.5.png",
-        "speaker": "Alien Cat B1",
-        "text": "Why is he sleeping here",
-        "sound": "talk.mp3"
-    },
-    {
-        "bg": "2.5.png",
-        "speaker": "Alien Cat B2",
-        "text": "I think he just sleepy",
-        "sound": "talk.mp3"
-    },
-    {
-        "bg": "2.5.png",
-        "speaker": "Alien Cat B1",
-        "text": "Are you thinking what I'm thinking, B1?",
-        "sound": "talk.mp3"
-    },
-    {
-        "bg": "2.5.png",
-        "speaker": "Alien Cat B2",
-        "text": "I think I am, B2!",
-        "sound": "talk.mp3"
-    },
-    {
-        "bg": "3.png",
-         "speaker": "B1 & B2",
-         "text": "Let's take him back home!",
-        "sound": "talk.mp3"
-    },
-    {
-        "bg": "4.png",
-        "speaker": "B1 & B2",
-        "text": "Muheheheheheh",
-        "sound": "realufo.mp3"
-    },
-    {
-        "bg": "5.png",
-        "speaker": "B1 & B2",
-        "text": "Let's go!!!",
-        "sound": None
-    },
-    {
-        "bg": "5.png",
-        "speaker": "(You)",
-        "text": "HELPPPPPPPPPPPP!!!!",
-        "sound": None
-    }
-]
+            {
+                "bg": "1.png",
+                "speaker": ". . .",
+                "text": "As evening fell over the quiet farm...",
+                "sound": None
+            },
+            {
+                "bg": "1.png",
+                "speaker": ". . .",
+                "text": "A cool breeze blew down from the mountains across the open fields.",
+                "sound": None
+            },
+            {
+                "bg": "1.png",
+                "speaker": ". . .",
+                "text": "All the farm animals were resting peacefully in their spots.",
+                "sound": None
+            },
+            {
+                "bg": "1.png",
+                "speaker": ". . .",
+                "text": "Including a certain little orange cat...",
+                "sound": None
+            },
+            {
+                "bg": "1.png",
+                "speaker": ". . .",
+                "text": "Everything seemed completely normal.",
+                "sound": None
+            },
+            {
+                "bg": "1.png",
+                "speaker": ". . .",
+                "text": "Except for one thing...",
+                "sound": None
+            },
+            {
+                 "bg": "1.png",
+                "speaker": ". . .",
+                "text": "! ? ! ? !",
+                "sound": "!.mp3"
+            },
+            {
+                "bg": "2.png",
+                "speaker": "(You)",
+                "text": "Zzz z ... .z",
+                "sound": "snore.mp3"
+            },
+            {
+                "bg": "2.5.png",
+                "speaker": "Alien Cat B1",
+                "text": "Why is he sleeping here",
+                "sound": "talk.mp3"
+            },
+            {
+                "bg": "2.5.png",
+                "speaker": "Alien Cat B2",
+                "text": "I think he just sleepy",
+                "sound": "talk.mp3"
+            },
+            {
+                "bg": "2.5.png",
+                "speaker": "Alien Cat B1",
+                "text": "Are you thinking what I'm thinking, B1?",
+                "sound": "talk.mp3"
+            },
+            {
+                "bg": "2.5.png",
+                "speaker": "Alien Cat B2",
+                "text": "I think I am, B2!",
+                "sound": "talk.mp3"
+            },
+            {
+                "bg": "3.png",
+                 "speaker": "B1 & B2",
+                 "text": "Let's take him back home!",
+                "sound": "talk.mp3"
+            },
+            {
+                "bg": "4.png",
+                "speaker": "B1 & B2",
+                "text": "Muheheheheheh",
+                "sound": "realufo.mp3"
+            },
+            {
+                "bg": "5.png",
+                "speaker": "B1 & B2",
+                "text": "Let's go!!!",
+                "sound": None
+            },
+            {
+                "bg": "5.png",
+                "speaker": "(You)",
+                "text": "HELPPPPPPPPPPPP!!!!",
+                "sound": None
+            }
+        ]
         self.current_line_idx = 0
 
+        # ตัวแปรเก็บภาพพื้นหลังปัจจุบัน
         self.current_bg = None
         self._load_current_background()
 
+        # ตัวแปรสำหรับการพิมพ์ข้อความทีละตัวอักษร (Typewriter Effect)
         self.current_text = ""
         self.target_text = self.script[0]["text"]
         self.char_index = 0
         self.text_timer = 0
-        self.text_speed = 35
+        self.text_speed = 35  # ความเร็วในการพิมพ์ (มิลลิวินาที)
         self.is_finished_typing = False
-        self.has_played_sound = False
+        self.has_played_sound = False  # ตัวแปรเช็คสถานะการเล่นเสียงประจำบรรทัด
+
+        # โหลดเสียง Soundboard พื้นฐาน (สำหรับเสียงพิมพ์ตัวหนังสือ)
+        self.blip_sound = self._load_sound("text_blip.wav")
+
+        # จัดการเสียงเพลงพื้นหลัง (Background Music)
         self._manage_background_music()
 
     def _load_current_background(self):
+        """โหลดรูปภาพพื้นหลัง พร้อมปรับให้ขยายเต็มหน้าจอ"""
         bg_name = self.script[self.current_line_idx]["bg"]
         bg_path = Path("game/scenes/image") / bg_name
 
@@ -143,6 +151,7 @@ class StoryScene:
         return None
 
     def _manage_background_music(self):
+        """จัดการเพลงพื้นหลัง: ถ้าอยู่หน้า 1.png ให้เล่นวนไปเรื่อยๆ ถ้าพ้นแล้วให้หยุด"""
         current_bg = self.script[self.current_line_idx]["bg"]
         bg_music_path = Path("game/scenes/soundeffect") / "farm.mp3"
 
@@ -178,6 +187,7 @@ class StoryScene:
             self.char_index = len(self.target_text)
             self.is_finished_typing = True
 
+            # ถ้ากดคลิกข้ามตอนกำลังพิมพ์ แล้วเสียงยังไม่เคยเล่น ให้เล่นเสียงดักไว้เลย
             if not self.has_played_sound:
                 self._play_current_sound()
                 self.has_played_sound = True
@@ -202,13 +212,18 @@ class StoryScene:
             if self.text_timer >= self.text_speed:
                 self.text_timer = 0
                 if self.char_index < len(self.target_text):
+                    # เติมตัวอักษรทีละตัว
                     self.current_text += self.target_text[self.char_index]
                     self.char_index += 1
 
+                    # ทันทีที่ตัวอักษรตัวแรกปรากฏขึ้น (char_index == 1) ให้สั่งเล่นเสียงพูดทันที!
                     if self.char_index == 1 and not self.has_played_sound:
                         self._play_current_sound()
                         self.has_played_sound = True
 
+                    # เสียงก๊อกแก๊กพิมพ์ตัวหนังสือ
+                    if self.blip_sound and self.char_index % 2 == 0:
+                        self.blip_sound.play()
                 else:
                     self.is_finished_typing = True
 
@@ -216,13 +231,13 @@ class StoryScene:
         if self.current_bg:
             screen.blit(self.current_bg, (0, 0))
 
-        box_width = WIDTH -  800
+        box_width = WIDTH - 800 if WIDTH > 1000 else WIDTH - 100
         box_height = 130
         box_x = (WIDTH - box_width) // 2
         box_y = HEIGHT - 160
         box_rect = pygame.Rect(box_x, box_y, box_width, box_height)
 
-        #Stardew
+        # Stardew Theme Colors
         c_outline = (58, 25, 11)
         c_wood_dark = (145, 72, 24)
         c_wood_mid = (204, 118, 43)
@@ -235,13 +250,13 @@ class StoryScene:
         shadow_rect = pygame.Rect(box_rect.x, box_rect.bottom - 30, box_rect.width, 30)
         pygame.draw.rect(screen, c_bg_shadow, shadow_rect)
 
-        #ขอบไม้
+        # ขอบไม้
         pygame.draw.rect(screen, c_outline, box_rect, 4)
         pygame.draw.rect(screen, c_wood_dark, box_rect.inflate(-8, -8), 4)
         pygame.draw.rect(screen, c_wood_mid, box_rect.inflate(-16, -16), 4)
         pygame.draw.rect(screen, c_wood_light, box_rect.inflate(-24, -24), 2)
 
-        #มุมกล่อง
+        # มุมกล่อง
         corner_offsets = [
             (box_rect.left + 8, box_rect.top + 8),
             (box_rect.right - 14, box_rect.top + 8),
@@ -252,7 +267,7 @@ class StoryScene:
             pygame.draw.rect(screen, c_outline, (cx, cy, 6, 6))
             pygame.draw.rect(screen, c_wood_light, (cx + 1, cy + 1, 3, 3))
 
-        #ป้ายชื่อ
+        # ป้ายชื่อ
         current_speaker = self.script[self.current_line_idx]["speaker"]
         tag_width = max(110, len(current_speaker) * 12 + 24)
         tag_height = 32
@@ -271,6 +286,7 @@ class StoryScene:
         draw_text(screen, current_speaker, (text_x, text_y), font_size, c_text)
         draw_text(screen, self.current_text, (box_rect.x + 25, box_rect.y + 30), 20, c_text)
 
+        # วาดไอคอนสามเหลี่ยมพิกเซลตรงมุมขวาล่างเมื่อพิมพ์จบ
         if self.is_finished_typing:
             btn_rect = pygame.Rect(box_rect.right - 34, box_rect.bottom - 30, 16, 16)
             pygame.draw.rect(screen, c_wood_mid, btn_rect)

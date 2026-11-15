@@ -2,7 +2,13 @@
 
 A small tower-climbing game built with Python and pygame. The game
 shows multiple towers on a shared map. Each tower contains floors with one
+<<<<<<< HEAD
 enemy per floor; clear every floor in one tower to unlock the next one.
+=======
+enemy per floor; clear every floor in one tower to unlock the next one. The
+prototype uses drawn shapes and system fonts, so it runs before optional image,
+audio, and font assets are added.
+>>>>>>> 12edd653b83b2eb7f1300b2b4d242e3972b34579
 
 ## Run
 
@@ -11,6 +17,7 @@ python -m pip install -r requirements.txt
 python main.py
 ```
 
+<<<<<<< HEAD
 Run it from the project root (asset paths are relative to it).
 
 ## Game flow
@@ -45,3 +52,9 @@ sheets in `assets/player` and `assets/enemy`.
 
 The game data lives in `data/`. Add art and audio under `assets/` without
 changing the game systems.
+=======
+Each battle compares your doable damage with the enemy’s power; you must exceed it to win. Victories add enemy power and replace your item. A normal loss costs one life, while a boss loss ends the run. Stick reduces damage to 90% of power and lightsaber increases it to 110%.
+
+The game data lives in `data/`. Add art and audio under `assets/` without
+changing the game systems.
+>>>>>>> 12edd653b83b2eb7f1300b2b4d242e3972b34579

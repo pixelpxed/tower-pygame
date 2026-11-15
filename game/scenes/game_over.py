@@ -2,10 +2,11 @@ from pathlib import Path
 import pygame
 
 from game.settings import HEIGHT, WIDTH
-from ui.battle import HomeButton, draw_hearts
+from ui.battle_kub import HomeButton, draw_hearts
 from game.scenes.cut_scene import CutScene
 
 BLACK = (15, 15, 20)
+
 class RestartButton:
     def __init__(self, center: tuple, callback, size: int = 96):
         self.rect = pygame.Rect(0, 0, size, size)
@@ -34,10 +35,14 @@ class RestartButton:
 class GameOverScene:
     def __init__(self, game):
         self.game = game
-        self.fatal = (not game.won) and (not game.player.alive)   # หัวใจหมดแล้ว -> ไป EndLostScene ต่อ
-        self.fatal_delay = 2.0                                    # วินาทีที่ค้างหน้า DEFEATED ก่อนไปต่อ
+        self.fatal = (not game.won) and (not game.player.alive)   # หัวใจหมดแล้ว -> ไป EndLostScene หรือ Bad Ending ต่อ
+        self.fatal_delay = 2.0                                    # ระยะเวลาหน่วง (วินาที) ค้างหน้า DEFEATED ก่อนไปต่อ
         size = 96
         y = HEIGHT - 100
+
+        pygame.mixer.music.stop()
+        if not game.won:
+            game.play_sound("fail.mp3")
 
         def go_home_with_cutscene():
             if hasattr(game, "play_cutscene"):
@@ -63,9 +68,9 @@ class GameOverScene:
             ]
         else:
             offset = size // 2 + 25
+            retry_func = getattr(game, "retry_battle", game.new_run)
             self.buttons = [
-                # แพ้แล้วกลับไปสู้ตัวเดิม (หัวใจหมดจะเริ่มเกมใหม่เอง)
-                RestartButton((WIDTH // 2 - offset, y), game.retry_battle, size=size),
+                RestartButton((WIDTH // 2 - offset, y), retry_func, size=size),
                 HomeButton((WIDTH // 2 + offset, y), game.show_menu, size=size),
             ]
 
@@ -75,7 +80,7 @@ class GameOverScene:
                 event.type == pygame.KEYDOWN and event.key in (
                     pygame.K_SPACE, pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_ESCAPE))
             if skip:
-                self.game.retry_battle()      # หัวใจหมด -> EndLostScene
+                self.game.retry_battle()
             return
         for button in self.buttons:
             button.handle_event(event)

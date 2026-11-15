@@ -36,7 +36,7 @@
       "name": "Zeltoria",
       "floors": [
         {"monster": {"name": "Xylo-X", "kind": "enemy", "power": 2222, "item": "stick"}},
-        {"monster": {"name": "Sycora-Prime", "kind": "enemy", "power": 3333 , "item": "lightsaber"}},
+        {"monster": {"name": "Sycora-Prime", "kind": "enemy", "power": 3333, "item": "lightsaber"}},
         {"monster": {"name": "Zexis-Omega", "kind": "enemy", "power": 2222, "item": "lightsaber"}},
         {"monster": {"name": "Xylos-Ultimate", "kind": "boss", "power": 9999, "item": null}}
       ]

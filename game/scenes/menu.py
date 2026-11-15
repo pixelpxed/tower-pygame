@@ -1,6 +1,6 @@
-import pygame
 from pathlib import Path
-from game.settings import COLORS, HEIGHT, WIDTH
+import pygame
+from game.settings import HEIGHT, WIDTH
 from ui.button import Button
 
 
@@ -16,17 +16,21 @@ class MenuScene:
         button_x = (WIDTH // 2) - (button_width // 2) + 295
         button_y = HEIGHT // 2
 
-        self.start = Button((button_x, button_y, button_width, button_height), "S T A R T", self.start)
+        self.start = Button((button_x, button_y, button_width, button_height), "S T A R T", self.start_game)
         self.quit = Button((button_x, button_y + button_height + 30, button_width, button_height), "Q U I T",
                            self.game.quit)
 
     def play_music(self):
         music_path = Path("game/scenes/soundeffect/soundback_home.mp3")
-        pygame.mixer.music.load(str(music_path))
-        pygame.mixer.music.play(-1)
-        pygame.mixer.music.set_volume(0.5)
+        if music_path.exists():
+            try:
+                pygame.mixer.music.load(str(music_path))
+                pygame.mixer.music.play(-1)
+                pygame.mixer.music.set_volume(0.5)
+            except Exception as e:
+                print(f"[MenuScene] Cannot play music: {e}")
 
-    def start(self):
+    def start_game(self):
         pygame.mixer.music.stop()
         self.game.new_run()
 

@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+<<<<<<< HEAD
   <component name="ProjectRootManager" version="2" project-jdk-name="~\Downloads\tower-pygame-final2\tower-pygame-main\.venv" project-jdk-type="Python SDK" />
+=======
+  <component name="ProjectRootManager" version="2" project-jdk-name="~\Downloads\tower-pygame-main\tower-pygame-main\.venv" project-jdk-type="Python SDK" />
+>>>>>>> 12edd653b83b2eb7f1300b2b4d242e3972b34579
 </project>

@@ -75,11 +75,12 @@ class CutScene:
 
     def _draw_skip_hint(self, screen):
         pos = (WIDTH // 2, HEIGHT - 32)
+        # เงาดำ ให้อ่านออกแม้ภาพข้างหลังสว่างหรือกะพริบ
         draw_text(screen, SKIP_HINT, (pos[0] + 2, pos[1] + 2), 20, (0, 0, 0), center=True)
         draw_text(screen, SKIP_HINT, pos, 20, (255, 255, 255), center=True)
 
     def draw(self, screen):
-        if not self.frames:
+        if not self.frames:  # ไม่มีภาพเลย ข้ามฉากไปเลย
             self._finish()
             return
 
@@ -144,7 +145,7 @@ class CutScene:
         if alpha:
             self.fade_surface.set_alpha(alpha)
             screen.blit(self.fade_surface, (0, 0))
-        self._draw_skip_hint(screen)
 
+        self._draw_skip_hint(screen)
         if elapsed >= DURATION_MS:
             self._finish()

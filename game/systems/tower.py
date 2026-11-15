@@ -36,3 +36,4 @@ class Tower:
     def is_boss_room(self, tower: int, floor: int) -> bool:
         floors = self.floors_for_tower(tower)
         return tower == len(self.towers) - 1 and floor == len(floors) - 1
+

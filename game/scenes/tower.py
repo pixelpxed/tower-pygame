@@ -5,15 +5,15 @@ import pygame
 
 from game.scenes.battle import load_background
 from game.settings import COLORS, HEIGHT, WIDTH
-from ui.battle import HomeButton, draw_hearts, draw_monster_power, draw_power
+from ui.battle_kub import HomeButton, draw_hearts, draw_monster_power, draw_power
 from ui.text import draw_text
 
-TOWER_WIDTH = 150
+TOWER_WIDTH = 180
 GAP = 22
-BOTTOM = 640
-FLOOR_HEIGHT = 100
-PLAYER_IMAGE_SIZE = (60, 60)
-ENEMY_IMAGE_SIZE = (60, 60)
+BOTTOM = 650
+FLOOR_HEIGHT = 120
+PLAYER_IMAGE_SIZE = (90, 90)
+ENEMY_IMAGE_SIZE = (90, 90)
 BONK_DELAY_MS = 320
 
 
@@ -23,8 +23,6 @@ class TowerScene:
         self.bg_image = load_background((WIDTH, HEIGHT))
         self.menu = HomeButton((WIDTH // 2, 24 + 32), game.show_menu)  # top-center
         root = Path(__file__).resolve().parents[2]
-
-        # โหลดเท็กซ์เจอร์หอคอยและหลังคา
         self.floor_texture = self._load_texture(
             root / "assets" / "tower-floors.png",
             (TOWER_WIDTH, FLOOR_HEIGHT),
@@ -120,6 +118,12 @@ class TowerScene:
     def update(self, dt_ms):
         if not self.attacking:
             return
+
+        if self.bonk_delay is not None:
+            self.bonk_delay -= dt_ms
+            if self.bonk_delay <= 0:
+                self.game.play_sound("bonk.mp3")
+                self.bonk_delay = None
 
         frames = self.player_frames if self.player_won else self.enemy_frames
         durations = self.player_durations if self.player_won else self.enemy_durations

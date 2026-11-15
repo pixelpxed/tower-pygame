@@ -30,6 +30,7 @@ class Game:
         self.defeated = set()
         self.tower = Tower(DATA_DIR / "towers.json")
         self.scene = MenuScene(self)
+        self.tower_scene = TowerScene(self)
 
     # ------------------------------------------------------------------ flow
     def new_run(self):
@@ -136,3 +137,8 @@ class Game:
             self.scene.draw(self.screen)
             pygame.display.flip()
         pygame.quit()
+
+    def play_sound(self, filename: str):
+        sound_path = DATA_DIR.parent / "game" / "scenes" / "soundeffect" / filename
+        sound = pygame.mixer.Sound(sound_path)
+        sound.play()

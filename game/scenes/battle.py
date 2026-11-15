@@ -2,8 +2,9 @@ from pathlib import Path
 import pygame
 
 from game.settings import COLORS, HEIGHT, WIDTH
-from ui.battle import draw_hearts, draw_power
+from ui.battle_kub import HomeButton, draw_hearts, draw_power
 from ui.button import Button
+from ui.hud import draw_bar
 from ui.text import draw_text
 
 
@@ -18,6 +19,7 @@ class BattleScene:
         self.game = game
         self.bg_image = load_background((WIDTH, HEIGHT))
 
+        # สร้างปุ่ม Attack ตรงกลางหน้าจอ
         self.attack = Button((WIDTH // 2 - 120, 500, 240, 54), "Attack", self.game.player_attack)
 
     def handle_event(self, event):
@@ -27,15 +29,17 @@ class BattleScene:
         screen.blit(self.bg_image, (0, 0))
 
         player, monster = self.game.player, self.game.monster
+
         tower_name = self.game.tower.tower_name(player.tower)
 
-        # HUD (top-left hearts, top-right POWER)
+        # HUD pills (top-left hearts, top-right POWER)
         margin = 24
         draw_hearts(screen, player.lives, 3, (margin, margin),
                     max_hearts=3)
         draw_power(screen, (WIDTH - margin, margin), player.power)
 
-        draw_text(screen, f"{tower_name} - Floor {(player.position[1] + 1)}",
+        # แสดงชื่อหอคอยและชั้นปัจจุบัน
+        draw_text(screen, f"{tower_name} Floor {(player.position[1] + 1)}",
                   (WIDTH // 2, 125), 32, COLORS["accent"], center=True)
         draw_text(screen, player.name, (220, 170), 26, COLORS["text"], center=True)
         draw_text(screen, "Opponent", (740, 170), 26, COLORS["text"], center=True)
@@ -46,4 +50,5 @@ class BattleScene:
         draw_text(screen, f"Item reward: {monster.item or 'None'}", (740, 255), 22, COLORS["text"], center=True)
 
         draw_text(screen, self.game.message, (WIDTH // 2, 390), 20, COLORS["muted"], center=True)
+
         self.attack.draw(screen)
