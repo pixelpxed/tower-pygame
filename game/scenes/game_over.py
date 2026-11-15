@@ -3,7 +3,6 @@ import pygame
 
 from game.settings import HEIGHT, WIDTH
 from ui.battle_kub import HomeButton
-from game.scenes.cut_scene import CutScene
 
 BLACK = (15, 15, 20)
 class RestartButton:
@@ -36,12 +35,9 @@ class GameOverScene:
         self.game = game
         size = 96
         y = HEIGHT - 100
-
-        def go_home_with_cutscene():
-            if hasattr(game, "play_cutscene"):
-                game.play_cutscene(on_done=game.show_menu)
-            else:
-                game.scene = CutScene(game, on_done=game.show_menu)
+        pygame.mixer.music.stop()
+        if not game.won:
+            game.play_sound("fail.mp3")
 
         bg_filename = "VICTORY.png" if game.won else "DEFEATED.png"
         image_path = Path("game/scenes/image/") / bg_filename
@@ -55,7 +51,7 @@ class GameOverScene:
 
         if game.won:
             self.buttons = [
-                HomeButton((WIDTH // 2, y), go_home_with_cutscene, size=size)
+                HomeButton((WIDTH // 2, y), game.show_menu, size=size)
             ]
         else:
             offset = size // 2 + 25

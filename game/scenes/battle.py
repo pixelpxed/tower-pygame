@@ -28,15 +28,13 @@ class BattleScene:
         screen.blit(self.bg_image, (0, 0))
 
         player, monster = self.game.player, self.game.monster
-        tower_name = self.game.tower.tower_name(player.tower)
-
         # HUD pills (top-left hearts, top-right POWER)
         margin = 24
         draw_hearts(screen, player.lives, 3, (margin, margin),
                     max_hearts=3)
         draw_power(screen, (WIDTH - margin, margin), player.power)
 
-        draw_text(screen, f"{tower_name} - Floor {(player.position[1] + 1)}",
+        draw_text(screen, f"Floor {(player.position[1] + 1)}",
                   (WIDTH // 2, 125), 32, COLORS["accent"], center=True)
         draw_text(screen, player.name, (220, 170), 26, COLORS["text"], center=True)
         draw_text(screen, "Opponent", (740, 170), 26, COLORS["text"], center=True)

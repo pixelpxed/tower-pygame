@@ -1,24 +1,53 @@
 {
   "towers": [
     {
-      "name": "Sunspire",
+      "name": "Tower 1",
       "floors": [
-        {"monster": {"name": "Slime", "kind": "enemy", "power": 3, "item": null}}
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 3, "item": "stick"}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 4, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 6, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 8, "item": "lightsaber"}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 12, "item": null}}
       ]
     },
     {
-      "name": "Moonkeep",
+      "name": "Tower 2",
       "floors": [
-        {"monster": {"name": "Bat", "kind": "enemy", "power": 3, "item": "stick"}},
-        {"monster": {"name": "Witch", "kind": "enemy", "power": 3, "item": null}}
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 4, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 6, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 9, "item": "stick"}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 13, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 18, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 24, "item": "lightsaber"}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 32, "item": null}}
       ]
     },
     {
-      "name": "Stormhold",
+      "name": "Tower 3",
       "floors": [
-        {"monster": {"name": "Orc", "kind": "enemy", "power": 3, "item": "lightsaber"}},
-        {"monster": {"name": "Golem", "kind": "enemy", "power": 10, "item": null}},
-        {"monster": {"name": "Tower Boss", "kind": "boss", "power": 16, "item": null}}
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 5, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 8, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 12, "item": "stick"}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 17, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 25, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 36, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 50, "item": "lightsaber"}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 68, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 90, "item": null}}
+      ]
+    },
+    {
+      "name": "Tower 4",
+      "floors": [
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 8, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 12, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 18, "item": "stick"}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 27, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 40, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 58, "item": null}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 82, "item": "lightsaber"}},
+        {"monster": {"name": "Enemy", "kind": "enemy", "power": 115, "item": null}},
+        {"monster": {"name": "Boss", "kind": "boss", "power": 160, "item": null}}
       ]
     }
   ]
