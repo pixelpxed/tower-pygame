@@ -21,20 +21,14 @@ class Player:
 
     @property
     def alive(self) -> bool:
-        # เช็คทั้ง HP และ Lives เพื่อให้แน่ใจว่าตัวละครยังเล่นต่อได้
         return self.health > 0 and self.lives > 0
 
     @property
     def doable_damage(self) -> float:
-        # คำนวณความเสียหายโดยอิงจาก item ที่ถืออยู่ (ถ้ามี)
-        multiplier_map = {None: 1.0, "stick": 0.9, "lightsaber": 1.1}
+        multiplier_map = {None: 1.0, "stick": 0.85, "lightsaber": 1.15}
         multiplier = multiplier_map.get(self.item, 1.0)
         return self.power * multiplier
 
-    @property
-    def attack(self) -> int:
-        """ชื่อเดิมของค่าพลังโจมตี ตอนนี้ผูกกับ power (ไอเทมชนิด attack ที่ += จะไปเพิ่ม power)"""
-        return self.power
 
     @attack.setter
     def attack(self, value: int) -> None:
@@ -64,24 +58,4 @@ class Player:
         self.item = None
         self.inventory.clear()
         self.lives = self.max_lives
-    power: int = 5
-    lives: int = 3
-    item: str | None = None
-    position: tuple[int, int] = (0, 0)
-    tower: int = 0
-
-    @property
-    def alive(self) -> bool:
-        return self.lives > 0
-
-    @property
-    def doable_damage(self) -> float:
-        multiplier = {None: 1.0, "stick": 0.9, "lightsaber": 1.1}[self.item]
-        return self.power * multiplier
-
-    def reset(self) -> None:
-        self.power = 5
-        self.lives = 3
-        self.item = None
-        self.position = (0, 0)
-        self.tower = 0
+    
