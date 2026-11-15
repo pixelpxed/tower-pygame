@@ -75,12 +75,11 @@ class CutScene:
 
     def _draw_skip_hint(self, screen):
         pos = (WIDTH // 2, HEIGHT - 32)
-        # เงาดำ ให้อ่านออกแม้ภาพข้างหลังสว่างหรือกะพริบ
         draw_text(screen, SKIP_HINT, (pos[0] + 2, pos[1] + 2), 20, (0, 0, 0), center=True)
         draw_text(screen, SKIP_HINT, pos, 20, (255, 255, 255), center=True)
 
     def draw(self, screen):
-        if not self.frames:  # ไม่มีภาพเลย ข้ามฉากไปเลย
+        if not self.frames:
             self._finish()
             return
 
@@ -96,7 +95,7 @@ class CutScene:
 
         elapsed = now - self.start_ticks
         p = min(1.0, elapsed / DURATION_MS)
-        speed = _ease(p)  # 0 -> 1 : ยิ่งนานยิ่งเร็วขึ้น
+        speed = _ease(p)
 
         interval = START_INTERVAL + (END_INTERVAL - START_INTERVAL) * speed
         if now - self.last_switch >= interval:
@@ -110,8 +109,8 @@ class CutScene:
             inv.blit(frame, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
             frame = inv
 
-        beat = (now - self.last_switch) / max(1, interval)  # 0..1 ภายในแต่ละภาพ
-        punch = (1.0 - min(1.0, beat)) ** 2  # แรงสุดตอนเพิ่งสลับ
+        beat = (now - self.last_switch) / max(1, interval)
+        punch = (1.0 - min(1.0, beat)) ** 2
         zoom = 1.08 + 0.12 * punch * (0.5 + speed)
         angle = WOBBLE_DEG * math.sin(elapsed / 90.0) * (0.3 + speed) if WOBBLE_DEG else 0
         if angle:
